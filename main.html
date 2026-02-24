@@ -193,7 +193,26 @@
                     clearInterval(tmr);
                     document.getElementById("loading").classList.add("loaded");
 
-                    let data = data1.concat(data2);
+                    const dataByDatetime = new Map();
+                    const deviceSet = new Set();
+                    const indexDataRows = (rows) => {
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i];
+                            const datetimeKey = `${row.date} ${row.time}`;
+                            let bucket = dataByDatetime.get(datetimeKey);
+                            if (!bucket) {
+                                bucket = [];
+                                dataByDatetime.set(datetimeKey, bucket);
+                            }
+                            bucket.push(row);
+                            deviceSet.add(row.device);
+                        }
+                    };
+                    indexDataRows(data1);
+                    indexDataRows(data2);
+                    window.data1 = null;
+                    window.data2 = null;
+
                     const stateDictionary = {
                         level: {
                             active: {
@@ -283,19 +302,18 @@
                     let workTimeState = getFlaggedKeys(stateDictionary.work.flag);
 
                     const filterNurseData = () => {
-                        return data.filter((elem) => {
+                        const datetimeKey = datetimeIdxDict[timeIdx];
+                        const rowsAtTime = dataByDatetime.get(datetimeKey) || [];
+                        return rowsAtTime.filter((elem) => {
                             return (
-                                (elem.date === dateIdxDict[timeIdx]) &
-                                (elem.time === timeIdxDict[timeIdx]) &
-                                (elem.rssi > -120) &
-                                workTimeState.includes(elem.work_time) &
+                                (elem.rssi > -120) &&
+                                workTimeState.includes(elem.work_time) &&
                                 levelState.includes(elem.level)
                             );
                         });
                     };
 
                     let dataTimeIdx = filterNurseData();
-                    let deviceNum = dataTimeIdx.length;
 
                     let timer = d3.timeout(() => {}, 1);
                     const FPS = 10;
@@ -305,7 +323,7 @@
                     let playCount = 0;
                     let rewindCount = 0;
 
-                    const DEVICE_LIST = [...new Set(data.map((elem) => elem["device"]))];
+                    const DEVICE_LIST = [...deviceSet];
                     const STATION_LIST = ["beacon56", "beacon57", "beacon58"];
                     const COLLIDOR_LIST = Array.from({ length: 56 - 36 }, (_, i) => `beacon${i + 36}`);
 
@@ -424,29 +442,9 @@
                     const circleY = (d) => yMap(d["y"], d["device"], d["beacon"]);
                     const textX = (d) => xMap(d["x"], d["device"], d["beacon"]);
                     const textY = (d) => yMap(d["y"], d["device"], d["beacon"]) + 10;
+                    const dataKey = (d) => d["device"];
 
                     let svg = d3.select(".stage").append("svg");
-                    svg.selectAll("circle")
-                        .data(dataTimeIdx)
-                        .enter()
-                        .append("circle")
-                        .style("fill", circleFill)
-                        .style("stroke", circleStroke)
-                        .style("stroke-width", 5)
-                        .attr("r", CIRCLE_R)
-                        .attr("cx", circleX)
-                        .attr("cy", circleY);
-
-                    svg.selectAll("text")
-                        .data(dataTimeIdx)
-                        .enter()
-                        .append("text")
-                        .text((d) => d["device"].substr(6))
-                        .attr("class", "staff_label")
-                        .attr("fill", "white")
-                        .attr("text-anchor", "middle")
-                        .attr("x", textX)
-                        .attr("y", textY);
 
                     const BG_STAY_TIME = "rgb(255, 255, 255, 1)";
                     const BG_STAY_TIME_CLEAR = "rgb(255, 255, 255, 0)";
@@ -467,128 +465,51 @@
                         stayTime > 0 && !COLLIDOR_LIST.includes(beacon) ? BG_TEXT_STAY_TIME : BG_TEXT_STAY_TIME_CLEAR;
 
                     let svgStayTime = d3.select(".stage").append("svg");
-                    svgStayTime
-                        .selectAll("rect")
-                        .data(dataTimeIdx)
-                        .enter()
-                        .append("rect")
-                        .attr("width", WIDTH_STAY_TIME)
-                        .attr("height", HEIGHT_STAY_TIME)
-                        .style("fill", rectFill)
-                        .attr("x", rectX)
-                        .attr("y", rectY);
 
-                    svgStayTime
-                        .selectAll("text")
-                        .data(dataTimeIdx)
-                        .enter()
-                        .append("text")
-                        .text((d) => d["stay_time"])
-                        .attr("class", "stay_label")
-                        .attr("fill", textFill)
-                        .attr("text-anchor", "middle")
-                        .attr("x", stayTimeTextX)
-                        .attr("y", stayTimeTextY);
+                    const bindData = (selection, rows, key, createEnter) => {
+                        const update = selection.data(rows, key);
+                        update.exit().remove();
+                        const enter = createEnter(update.enter());
+                        return enter.merge(update);
+                    };
+
+                    const renderNurseData = (useTransition = false) => {
+                        const circles = bindData(svg.selectAll("circle"), dataTimeIdx, dataKey, (enter) =>
+                            enter.append("circle").style("stroke-width", 5).attr("r", CIRCLE_R)
+                        );
+                        const staffTexts = bindData(svg.selectAll("text"), dataTimeIdx, dataKey, (enter) =>
+                            enter.append("text").attr("class", "staff_label").attr("fill", "white").attr("text-anchor", "middle")
+                        );
+                        const stayRects = bindData(svgStayTime.selectAll("rect"), dataTimeIdx, dataKey, (enter) =>
+                            enter.append("rect").attr("width", WIDTH_STAY_TIME).attr("height", HEIGHT_STAY_TIME)
+                        );
+                        const stayTexts = bindData(svgStayTime.selectAll("text"), dataTimeIdx, dataKey, (enter) =>
+                            enter.append("text").attr("class", "stay_label").attr("text-anchor", "middle")
+                        );
+
+                        circles.style("fill", circleFill).style("stroke", circleStroke);
+                        staffTexts.text((d) => d["device"].substr(6));
+                        stayRects.style("fill", rectFill);
+                        stayTexts.text((d) => d["stay_time"]).attr("fill", textFill);
+
+                        if (useTransition) {
+                            circles.transition().ease(d3.easeLinear).attr("cx", circleX).attr("cy", circleY);
+                            staffTexts.transition().ease(d3.easeLinear).attr("x", textX).attr("y", textY);
+                            stayRects.transition().ease(d3.easeLinear).attr("x", rectX).attr("y", rectY);
+                            stayTexts.transition().ease(d3.easeLinear).attr("x", stayTimeTextX).attr("y", stayTimeTextY);
+                        } else {
+                            circles.attr("cx", circleX).attr("cy", circleY);
+                            staffTexts.attr("x", textX).attr("y", textY);
+                            stayRects.attr("x", rectX).attr("y", rectY);
+                            stayTexts.attr("x", stayTimeTextX).attr("y", stayTimeTextY);
+                        }
+                    };
+
+                    renderNurseData();
 
                     function updateCircle() {
                         dataTimeIdx = filterNurseData();
-
-                        console.log(timeIdx, dateIdxDict[timeIdx], timeIdxDict[timeIdx], deviceNum);
-                        console.log(dataTimeIdx);
-
-                        if (deviceNum !== dataTimeIdx.length) {
-                            deviceNum = dataTimeIdx.length;
-                            svg.selectAll("circle").remove();
-                            svg.selectAll("text").remove();
-                            svgStayTime.selectAll("rect").remove();
-                            svgStayTime.selectAll("text").remove();
-
-                            svg.selectAll("circle")
-                                .data(dataTimeIdx)
-                                .enter()
-                                .append("circle")
-                                .style("fill", circleFill)
-                                .style("stroke", circleStroke)
-                                .style("stroke-width", 5)
-                                .attr("r", CIRCLE_R)
-                                .attr("cx", circleX)
-                                .attr("cy", circleY);
-
-                            svg.selectAll("text")
-                                .data(dataTimeIdx)
-                                .enter()
-                                .append("text")
-                                .text(function (d) {
-                                    return d["device"].substr(6);
-                                })
-                                .attr("class", "staff_label")
-                                .attr("fill", "white")
-                                .attr("text-anchor", "middle")
-                                .attr("x", textX)
-                                .attr("y", textY);
-
-                            svgStayTime
-                                .selectAll("rect")
-                                .data(dataTimeIdx)
-                                .enter()
-                                .append("rect")
-                                .attr("width", WIDTH_STAY_TIME)
-                                .attr("height", HEIGHT_STAY_TIME)
-                                .style("fill", rectFill)
-                                .attr("x", rectX)
-                                .attr("y", rectY);
-
-                            svgStayTime
-                                .selectAll("text")
-                                .data(dataTimeIdx)
-                                .enter()
-                                .append("text")
-                                .attr("class", "stay_label")
-                                .text(function (d) {
-                                    return d["stay_time"];
-                                })
-                                .attr("fill", textFill)
-                                .attr("text-anchor", "middle")
-                                .attr("x", stayTimeTextX)
-                                .attr("y", stayTimeTextY);
-                        } else {
-                            svg.selectAll("circle")
-                                .data(dataTimeIdx)
-                                .style("fill", circleFill)
-                                .style("stroke", circleStroke)
-                                .transition()
-                                .ease(d3.easeLinear)
-                                .attr("cx", circleX)
-                                .attr("cy", circleY);
-
-                            svg.selectAll("text")
-                                .data(dataTimeIdx)
-                                .transition()
-                                .ease(d3.easeLinear)
-                                .attr("x", textX)
-                                .attr("y", textY);
-
-                            svgStayTime
-                                .selectAll("rect")
-                                .data(dataTimeIdx)
-                                .style("fill", rectFill)
-                                .transition()
-                                .ease(d3.easeLinear)
-                                .attr("x", rectX)
-                                .attr("y", rectY);
-
-                            svgStayTime
-                                .selectAll("text")
-                                .data(dataTimeIdx)
-                                .text(function (d) {
-                                    return d["stay_time"];
-                                })
-                                .attr("fill", textFill)
-                                .transition()
-                                .ease(d3.easeLinear)
-                                .attr("x", stayTimeTextX)
-                                .attr("y", stayTimeTextY);
-                        }
+                        renderNurseData(true);
                     }
 
                     function updateSlider() {
