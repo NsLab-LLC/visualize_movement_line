@@ -5,11 +5,7 @@ from pathlib import Path
 
 project_root = Path(SPEC).resolve().parents[2]
 datas = [
-    (str(project_root / "main.html"), "."),
-    (str(project_root / "d3.js"), "."),
-    (str(project_root / "d3.js.gz"), "."),
-    (str(project_root / "data"), "data"),
-    (str(project_root / "scripts"), "scripts"),
+    (str(project_root / "VisualizeMovementData"), "VisualizeMovementData"),
     (str(project_root / "server.py"), "."),
 ]
 
