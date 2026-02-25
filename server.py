@@ -23,6 +23,14 @@ DEFAULT_COMPRESSIBLE_EXTENSIONS = {
     ".svg",
     ".txt",
 }
+FIXED_CONTENT_TYPES = {
+    ".js": "application/javascript",
+    ".mjs": "application/javascript",
+    ".json": "application/json",
+    ".css": "text/css",
+    ".html": "text/html; charset=utf-8",
+    ".svg": "image/svg+xml",
+}
 HEALTH_PATH = "/__health"
 HEALTH_RESPONSE_TEXT = "ok:visualize-movement-line"
 HEALTH_RESPONSE_BYTES = (HEALTH_RESPONSE_TEXT + "\n").encode("utf-8")
@@ -30,6 +38,7 @@ HEALTH_RESPONSE_BYTES = (HEALTH_RESPONSE_TEXT + "\n").encode("utf-8")
 
 class GzipSidecarHandler(SimpleHTTPRequestHandler):
     compressible_extensions = DEFAULT_COMPRESSIBLE_EXTENSIONS
+    fixed_content_types = FIXED_CONTENT_TYPES
 
     def _accepts_gzip(self) -> bool:
         accept_encoding = self.headers.get("Accept-Encoding", "")
@@ -58,6 +67,12 @@ class GzipSidecarHandler(SimpleHTTPRequestHandler):
         gzip_path = path.with_name(path.name + ".gz")
         return gzip_path.is_file()
 
+    def _content_type_for_path(self, path: Path) -> str:
+        fixed = self.fixed_content_types.get(path.suffix.lower())
+        if fixed:
+            return fixed
+        return super().guess_type(str(path))
+
     def do_GET(self) -> None:  # noqa: N802 - stdlib method name
         request_path = urlsplit(self.path).path
         if request_path == HEALTH_PATH:
@@ -83,7 +98,7 @@ class GzipSidecarHandler(SimpleHTTPRequestHandler):
             stat = os.fstat(file_obj.fileno())
             original_stat = path.stat()
             self.send_response(200)
-            self.send_header("Content-Type", self.guess_type(str(path)))
+            self.send_header("Content-Type", self._content_type_for_path(path))
             self.send_header("Content-Encoding", "gzip")
             self.send_header("Vary", "Accept-Encoding")
             self.send_header("Content-Length", str(stat.st_size))
@@ -91,6 +106,12 @@ class GzipSidecarHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return file_obj
         return super().send_head()
+
+    def guess_type(self, path: str) -> str:
+        fixed = self.fixed_content_types.get(Path(path).suffix.lower())
+        if fixed:
+            return fixed
+        return super().guess_type(path)
 
 
 def create_server(host: str, port: int, directory: str) -> ThreadingHTTPServer:
