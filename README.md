@@ -75,7 +75,12 @@ data1 = [
 - 生成先:
 - `dist/VisualizeMovement_macOS_<version>.zip`
 - `dist/VisualizeMovement_Windows_<version>.zip`
-- 事前条件: `PyInstaller` がインストール済みであること
+- 事前条件: ビルドに使う同じ Python 環境に `PyInstaller` がインストール済みであること
+- インストール例 (macOS/Linux): `python3 -m pip install pyinstaller`
+- インストール例 (Windows PowerShell): `python -m pip install pyinstaller`
+- インストール確認 (macOS/Linux): `python3 -m PyInstaller --version`
+- インストール確認 (Windows): `python -m PyInstaller --version`
+- `No module named PyInstaller` が出る場合: 仮想環境を有効化した状態で上記インストールを実行する
 
 # gzip 配信の運用
 
