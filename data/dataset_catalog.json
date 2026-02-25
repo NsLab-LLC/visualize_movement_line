@@ -1,0 +1,8 @@
+{
+  "defaultWard": "test",
+  "wards": {
+    "test": {
+      "dates": ["2023-03-15"]
+    }
+  }
+}

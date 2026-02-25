@@ -1,18 +1,12 @@
 "use strict";
 
-const WORK_LABEL_TO_CODE = Object.freeze({
-    "12時間": 0,
-    "日勤": 1,
-    "夜勤": 2,
-});
+importScripts("./filter_constants.js");
 
-const LEVEL_LABEL_TO_CODE = Object.freeze({
-    "未取得": 0,
-    "レベルⅠ": 1,
-    "レベルⅡ": 2,
-    "レベルⅢ": 3,
-    "レベルⅣ": 4,
-});
+if (!self.MOVEMENT_FILTERS) {
+    throw new Error("Movement filter constants are not loaded.");
+}
+
+const { WORK_LABEL_TO_CODE, LEVEL_LABEL_TO_CODE } = self.MOVEMENT_FILTERS;
 
 const toInt16 = (value) => {
     if (!Number.isFinite(value)) {

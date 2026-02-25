@@ -7,7 +7,8 @@
 
 # ファイル構成
 
-- `main.html` : UI/描画ロジック本体．D3.js を CDN とローカル `d3.js` から読み込む．
+- `main.html` : UI本体．ローカル `d3.js` と `scripts/main_app.js` を読み込む．
+- `data/dataset_catalog.json` : 初期表示する病棟 (`defaultWard`) と病棟ごとの日付一覧を定義する設定ファイル．
 - `scripts/day_data_worker.js` : 日次データを読み込み，`rssi` フィルタ・コード化・TypedArray化を行うWorker．
 - `data/js/test/2023-03-15_1.js` : サンプルデータ (グローバル変数 `data1` として宣言)．
 - `data/js/test/2023-03-15_2.js` : サンプルデータ (グローバル変数 `data2` として宣言)．
@@ -59,6 +60,6 @@ data1 = [
 
 # カスタマイズ手順
 
-- 病棟を変える: `main.html` 冒頭の `ward` 変数と，背景画像 (`data/fig/<病棟>.jpg`) を合わせる．  
-- 日付を増やす: 日付セレクタ生成部分のループを追加/変更し，対応する `data/js/<病棟>/<日付>_1.js` と `_2.js` を用意する．  
+- 病棟を変える: `data/dataset_catalog.json` の `defaultWard` と `wards` を更新し，背景画像 (`data/fig/<病棟>.jpg`) を用意する．  
+- 日付を増やす: `data/dataset_catalog.json` の `wards.<病棟>.dates` に日付を追加し，対応する `data/js/<病棟>/<日付>_1.js` と `_2.js` を用意する．  
 - データ形式を変える場合は，`startVisualize()` 内のフィルタや描画ロジックに合わせてフィールドを調整する．
