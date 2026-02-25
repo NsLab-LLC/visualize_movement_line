@@ -1,31 +1,31 @@
 # 動線可視化ツール概要
 
-- D3.js で看護師デバイスの位置と滞在時間をフロア図上に描画するシングルページアプリです。
-- データは `VisualizeMovementData/data/js/<病棟>/<日付>_1.js` と `_2.js` を `fetch` で読み込み，Web Worker で描画向けに変換して使用します。
-- 時間軸を 1 秒刻みで 08:00:00 から翌日 09:59:59 まで再生・巻き戻しでき，勤務帯やレベルでフィルタ可能です。
+- D3.js で看護師デバイスの位置と滞在時間をフロア図上に描画するシングルページアプリである．
+- データは `VisualizeMovementData/data/js/<病棟>/<日付>_1.js` と `_2.js` を `fetch` で読み込み，Web Worker で描画向けに変換して利用する．
+- 時間軸は 1 秒刻みで 08:00:00 から翌日 09:59:59 まで再生・巻き戻しでき，勤務帯やレベルでフィルタ可能である．
 
 # ディレクトリ構成
 
 - `VisualizeMovementData/`
-- `VisualizeMovementData/main.html` : UI本体
-- `VisualizeMovementData/d3.js` : ローカル D3 ライブラリ
-- `VisualizeMovementData/data/dataset_catalog.json` : 病棟と日付一覧の設定
-- `VisualizeMovementData/data/js/test/2023-03-15_1.js` : サンプルデータ1
-- `VisualizeMovementData/data/js/test/2023-03-15_2.js` : サンプルデータ2
-- `VisualizeMovementData/data/fig/test.jpg` : 背景画像
-- `VisualizeMovementData/scripts/day_data_worker.js` : 日次データ変換Worker
-- `VisualizeMovementData/scripts/filter_constants.js` : 勤務帯/レベルの定数
-- `launcher.py` : ダブルクリック起動用ランチャー
-- `server.py` : gzip sidecar 対応静的サーバー
-- `build/pyinstaller/*.spec` : macOS / Windows 向けビルド設定
-- `scripts/build_mac.sh` : macOS配布物ビルド＋ZIP化
-- `scripts/build_win.ps1` : Windows配布物ビルド＋ZIP化
-- `scripts/precompress_gzip.py` : `.js` の事前 gzip 圧縮
-- `docs/README_利用者向け.txt` : 配布ZIP同梱の利用者向け手順
+- `VisualizeMovementData/main.html`：UI 本体である．
+- `VisualizeMovementData/d3.js`：ローカル D3 ライブラリである．
+- `VisualizeMovementData/data/dataset_catalog.json`：病棟と日付一覧の設定である．
+- `VisualizeMovementData/data/js/test/2023-03-15_1.js`：サンプルデータ 1 である．
+- `VisualizeMovementData/data/js/test/2023-03-15_2.js`：サンプルデータ 2 である．
+- `VisualizeMovementData/data/fig/test.jpg`：背景画像である．
+- `VisualizeMovementData/scripts/day_data_worker.js`：日次データ変換 Worker である．
+- `VisualizeMovementData/scripts/filter_constants.js`：勤務帯／レベルの定数である．
+- `launcher.py`：ダブルクリック起動用ランチャーである．
+- `server.py`：gzip sidecar 対応静的サーバーである．
+- `build/pyinstaller/*.spec`：macOS／Windows 向けビルド設定である．
+- `scripts/build_mac.sh`：macOS 配布物のビルドと ZIP 化を行う．
+- `scripts/build_win.ps1`：Windows 配布物のビルドと ZIP 化を行う．
+- `scripts/precompress_gzip.py`：`.js` の事前 gzip 圧縮を行う．
+- `docs/README_利用者向け.txt`：配布 ZIP 同梱の利用者向け手順である．
 
 # データ形式
 
-各データファイルは以下の形の配列をグローバル変数として定義します。
+各データファイルは，以下の形の配列をグローバル変数として定義する．
 
 ```javascript
 data1 = [
@@ -48,54 +48,51 @@ data1 = [
 
 # 使い方（利用者向け）
 
-1. 配布された ZIP を展開します。
-2. 展開先にある `VisualizeMovement.exe`（Windows）または `VisualizeMovement.app`（macOS）をダブルクリックします。
-3. 既定ブラウザで可視化画面が自動で開きます。
-4. データ更新時は `VisualizeMovementData/data/` のみ差し替えます（アプリ再ビルド不要）。
+1. 配布された ZIP を展開する．
+2. 展開先にある `VisualizeMovement.exe`（Windows）または `VisualizeMovement.app`（macOS）をダブルクリックする．
+3. 既定ブラウザで可視化画面が自動で開く．
+4. データ更新時は `VisualizeMovementData/data/` のみ差し替える（アプリ再ビルドは不要である）．
 
-補足（404 エラーが出る場合）:
-- 旧バージョンの起動情報が残っている可能性があります。
-- macOS/Linux: `rm -f ~/.visualize_movement_line/server.lock.json`
-- Windows PowerShell: `Remove-Item "$HOME/.visualize_movement_line/server.lock.json" -ErrorAction SilentlyContinue`
-- その後、アプリを再起動してください。
+補足（404 エラーが出る場合）：
+- 旧バージョンの起動情報が残っている可能性がある．
+- macOS/Linux では，`rm -f ~/.visualize_movement_line/server.lock.json` を実行する．
+- Windows PowerShell では，`Remove-Item "$HOME/.visualize_movement_line/server.lock.json" -ErrorAction SilentlyContinue` を実行する．
+- その後，アプリを再起動する．
 
 # 使い方（開発者向け）
 
-1. 事前圧縮を実行します。  
+1. 事前圧縮を実行する．  
    `python3 scripts/precompress_gzip.py --root VisualizeMovementData --ext .js`
-2. ランチャーを起動します。  
+2. ランチャーを起動する．  
    `python3 launcher.py`
-3. ブラウザが自動で開かない場合は `http://127.0.0.1:<表示されたポート>/main.html` を開きます。
+3. ブラウザが自動で開かない場合は，`http://127.0.0.1:<表示されたポート>/main.html` を開く．
 
-補足:
-- データルートは環境変数 `VISUALIZE_MOVEMENT_DATA_DIR` で上書きできます。
-- 未指定時はランチャーが実行ファイル隣接の `VisualizeMovementData/` を優先して参照します。
+補足：
+- データルートは環境変数 `VISUALIZE_MOVEMENT_DATA_DIR` で上書きできる．
+- 未指定時はランチャーが実行ファイル隣接の `VisualizeMovementData/` を優先して参照する．
 
 # 配布物ビルド
 
-- macOS: `./scripts/build_mac.sh`
-- Windows (PowerShell): `.\scripts\build_win.ps1`
-- 任意バージョン指定例:
-- macOS: `./scripts/build_mac.sh 20260225`
-- Windows: `.\scripts\build_win.ps1 -Version 20260225`
-- 生成先:
-- `dist/VisualizeMovement_macOS_<version>.zip`
-- `dist/VisualizeMovement_Windows_<version>.zip`
-- 事前条件: ビルドに使う同じ Python 環境に `PyInstaller` がインストール済みであること
-- インストール例 (macOS/Linux): `python3 -m pip install pyinstaller`
-- インストール例 (Windows PowerShell): `python -m pip install pyinstaller`
-- インストール確認 (macOS/Linux): `python3 -m PyInstaller --version`
-- インストール確認 (Windows): `python -m PyInstaller --version`
-- `No module named PyInstaller` が出る場合: 仮想環境を有効化した状態で上記インストールを実行する
+- macOS ビルドは `./scripts/build_mac.sh` を実行する．
+- Windows（PowerShell）ビルドは `.\scripts\build_win.ps1` を実行する．
+- 任意バージョン指定例（macOS）は `./scripts/build_mac.sh 20260225` である．
+- 任意バージョン指定例（Windows）は `.\scripts\build_win.ps1 -Version 20260225` である．
+- 生成先は `dist/VisualizeMovement_macOS_<version>.zip` および `dist/VisualizeMovement_Windows_<version>.zip` である．
+- 事前条件は，ビルドに使う同じ Python 環境に `PyInstaller` がインストール済みであることである．
+- インストール例（macOS/Linux）は `python3 -m pip install pyinstaller` である．
+- インストール例（Windows PowerShell）は `python -m pip install pyinstaller` である．
+- インストール確認（macOS/Linux）は `python3 -m PyInstaller --version` である．
+- インストール確認（Windows）は `python -m PyInstaller --version` である．
+- `No module named PyInstaller` が出る場合は，仮想環境を有効化した状態で上記インストールを実行する．
 
 # gzip 配信の運用
 
-- データ更新後は `python3 scripts/precompress_gzip.py --root VisualizeMovementData --ext .js` を再実行します。
-- ブラウザが gzip を受け入れる場合，`server.py` は `*.js.gz` を `Content-Encoding: gzip` で返します。
-- 確認例:  
+- データ更新後は `python3 scripts/precompress_gzip.py --root VisualizeMovementData --ext .js` を再実行する．
+- ブラウザが gzip を受け入れる場合，`server.py` は `*.js.gz` を `Content-Encoding: gzip` で返す．
+- 確認例：  
   `curl -I -H 'Accept-Encoding: gzip' http://localhost:8000/data/js/test/2023-03-15_1.js`
 
 # カスタマイズ手順
 
-- 病棟を変える: `VisualizeMovementData/data/dataset_catalog.json` の `defaultWard` と `wards` を更新し，`VisualizeMovementData/data/fig/<病棟>.jpg` を追加する。
-- 日付を増やす: `VisualizeMovementData/data/dataset_catalog.json` の `wards.<病棟>.dates` を更新し，`VisualizeMovementData/data/js/<病棟>/<日付>_1.js` と `_2.js` を追加する。
+- 病棟を変える場合は，`VisualizeMovementData/data/dataset_catalog.json` の `defaultWard` と `wards` を更新し，`VisualizeMovementData/data/fig/<病棟>.jpg` を追加する．
+- 日付を増やす場合は，`VisualizeMovementData/data/dataset_catalog.json` の `wards.<病棟>.dates` を更新し，`VisualizeMovementData/data/js/<病棟>/<日付>_1.js` と `_2.js` を追加する．
