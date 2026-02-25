@@ -1,64 +1,203 @@
 <!DOCTYPE html>
-<meta charset="UTF-8" />
-
-<style>
-    body {
-        background-color: #eeeeee;
-    }
-</style>
-
-<body>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
     <style>
-        .stage {
-            margin: 20px 0px 0px 100px;
-            background-color: #ffffff;
+        :root {
+            --bg-page: #f2f4f7;
+            --bg-panel: #ffffff;
+            --bg-stage: #ffffff;
+            --border-subtle: #d0d7de;
+            --text-primary: #1f2328;
+            --text-muted: #57606a;
+            --focus-ring: #2563eb;
+            --button-bg: #fef3c7;
+            --button-hover: #f59e0b;
+            --status-info: #0f172a;
+            --status-loading: #1d4ed8;
+            --status-success: #065f46;
+            --status-error: #b91c1c;
         }
 
-        .button_label,
-        .date_label {
-            font: 24px sans-serif;
-        }
-
-        .stay_label {
-            font: 18px sans-serif;
-        }
-
-        .staff_label {
-            font: 28px sans-serif;
-        }
-
-        .custom-select {
-            border: solid 1px #999999;
+        * {
             box-sizing: border-box;
         }
 
-        svg text {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            pointer-events: none;
+        body {
+            margin: 0;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
         }
 
-        select {
-            font: 20px sans-serif;
-            border-radius: 5px;
-            width: 7em;
-            padding: 0.5em;
-            margin-left: 5em;
-            border: none;
-            box-shadow: none;
+        .app-shell {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: clamp(12px, 2vw, 24px);
+            display: grid;
+            gap: clamp(12px, 2vw, 20px);
+        }
+
+        .control-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: clamp(12px, 2vw, 18px);
+            display: grid;
+            gap: 14px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .field-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .custom-select {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            font-size: clamp(16px, 1.6vw, 20px);
+            padding: 0.45em 0.7em;
+            min-width: 9em;
             background: #fff;
-            text-align: -webkit-center;
-            -webkit-appearance: none;
-            outline: none;
+            color: var(--text-primary);
+        }
+
+        .date-label {
+            margin: 0;
+            min-width: 12em;
+            font-size: clamp(16px, 2.1vw, 24px);
+            font-weight: 700;
+        }
+
+        #time_slider {
+            width: min(100%, 980px);
+            height: 18px;
             cursor: pointer;
+        }
+
+        #time_slider:focus-visible,
+        button:focus-visible,
+        select:focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        .status-message {
+            margin: 0;
+            font-size: 14px;
+            min-height: 1.3em;
+            color: var(--status-info);
+            flex: 1 1 250px;
+            text-align: right;
+        }
+
+        .status-message[data-type="loading"] {
+            color: var(--status-loading);
+        }
+
+        .status-message[data-type="success"] {
+            color: var(--status-success);
+        }
+
+        .status-message[data-type="error"] {
+            color: var(--status-error);
+            font-weight: 700;
+        }
+
+        .control-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .control-group {
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 10px;
+            background: #f8fafc;
+            min-height: 100%;
+        }
+
+        .group-title {
+            margin: 0 0 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .button-group.vertical {
+            display: grid;
+            gap: 8px;
+        }
+
+        .control-button,
+        .filter-button {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 9px 10px;
+            font-size: clamp(14px, 1.5vw, 18px);
+            line-height: 1.1;
+            cursor: pointer;
+            transition: background-color 120ms ease-in-out, transform 80ms ease-in-out;
+        }
+
+        .control-button {
+            background-color: var(--button-bg);
+            color: var(--text-primary);
+            min-width: 96px;
+        }
+
+        .control-button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .control-button.is-active {
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 1px #1d4ed8;
+        }
+
+        .control-button:active,
+        .filter-button:active {
+            transform: scale(0.98);
+        }
+
+        .filter-button {
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+        }
+
+        .stage {
+            width: 100%;
+            height: auto;
+            background-color: var(--bg-stage);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
         }
 
         #loading {
             width: 100%;
             height: 100%;
-            transition: all 1s;
+            transition: opacity 300ms ease;
             background-color: rgba(240, 248, 255, 0.6);
             position: fixed;
             top: 0;
@@ -67,9 +206,9 @@
         }
 
         .spinner {
-            width: 200px;
-            height: 200px;
-            margin: 300px auto;
+            width: 120px;
+            height: 120px;
+            margin: min(30vh, 280px) auto;
             background-color: #fff;
             border-radius: 100%;
             animation: sk-scaleout 1s infinite ease-in-out;
@@ -84,68 +223,97 @@
             0% {
                 transform: scale(0);
             }
+
             100% {
                 transform: scale(1);
                 opacity: 0;
             }
         }
 
-        input[type="range"] {
-            margin: auto;
-            -webkit-appearance: none;
-            position: relative;
-            overflow: hidden;
-            height: 20px;
-            width: 800px;
-            cursor: pointer;
-            border-radius: 0;
-        }
+        @media (max-width: 1024px) {
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
 
-        ::-webkit-slider-runnable-track {
-            background: #eee;
-        }
-
-        ::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 10px;
-            height: 40px;
-            background: #fff;
-            box-shadow: -400px 0 0 400px dodgerblue;
-            border: 1px solid dodgerblue;
+            .status-message {
+                text-align: left;
+            }
         }
     </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="control-panel">
+            <div class="control-row">
+                <div class="control-field">
+                    <label for="date1" class="field-label">日付</label>
+                    <select id="date1" class="custom-select" name="date1"></select>
+                </div>
+                <p id="status_message" class="status-message" data-type="" aria-live="polite"></p>
+            </div>
 
-    <script src="d3.js"></script>
-    <script src="https://d3js.org/d3-timer.v1.min.js"></script>
-    <script>
-        let ward = "test";
+            <div class="control-row">
+                <p id="date_time_label" class="date-label"></p>
+                <input type="range" id="time_slider" value="0" min="0" step="1" />
+            </div>
 
-        let div1 = document.createElement("div");
-        div1.id = "div1";
+            <div class="control-grid">
+                <section class="control-group" aria-label="再生コントロール">
+                    <h2 class="group-title">再生</h2>
+                    <div class="button-group">
+                        <button id="btn_prev_30min" class="control-button" type="button">30分戻る</button>
+                        <button id="btn_rewind" class="control-button" type="button">◀︎</button>
+                        <button id="btn_pause" class="control-button" type="button">◼︎</button>
+                        <button id="btn_play" class="control-button" type="button">▶︎</button>
+                        <button id="btn_next_30min" class="control-button" type="button">30分進む</button>
+                    </div>
+                </section>
 
-        let selectDate = document.createElement("select");
-        selectDate.className = "custom-select";
-        selectDate.id = "date1";
-        selectDate.name = "date1";
-        for (let i = 15; i < 16; i++) {
-            let option_str = "2023-03-" + String(i).padStart(2, "0");
-            selectDate.add(new Option(option_str, option_str));
-        }
-        div1.appendChild(selectDate);
-        document.body.appendChild(div1);
-    </script>
+                <section class="control-group" aria-label="勤務帯フィルタ">
+                    <h2 class="group-title">勤務帯</h2>
+                    <div id="work_filter_controls" class="button-group vertical"></div>
+                </section>
 
-    <svg class="stage"></svg>
+                <section class="control-group" aria-label="レベルフィルタ">
+                    <h2 class="group-title">レベル</h2>
+                    <div id="level_filter_controls" class="button-group vertical"></div>
+                </section>
+            </div>
+        </header>
+
+        <svg class="stage"></svg>
+    </div>
+
     <div id="loading" class="loaded">
         <div class="spinner"></div>
     </div>
 
+    <script src="d3.js"></script>
+    <script src="https://d3js.org/d3-timer.v1.min.js"></script>
     <script type="text/javascript">
         startVisualize();
 
         function startVisualize() {
+            let ward = "test";
+
             const loading = document.getElementById("loading");
             const selectDate = document.getElementById("date1");
+            const timeSlider = document.getElementById("time_slider");
+            const dateTimeLabel = document.getElementById("date_time_label");
+            const statusMessage = document.getElementById("status_message");
+            const workFilterControls = document.getElementById("work_filter_controls");
+            const levelFilterControls = document.getElementById("level_filter_controls");
+            const btnPrev30min = document.getElementById("btn_prev_30min");
+            const btnRewind = document.getElementById("btn_rewind");
+            const btnPause = document.getElementById("btn_pause");
+            const btnPlay = document.getElementById("btn_play");
+            const btnNext30min = document.getElementById("btn_next_30min");
+
+            for (let i = 15; i < 16; i++) {
+                const optionStr = "2023-03-" + String(i).padStart(2, "0");
+                selectDate.add(new Option(optionStr, optionStr));
+            }
+
             const TIME_INDEX_LENGTH = 26 * 60 * 60;
             const START_HOUR = 8;
             const DAY_BOUNDARY_INDEX = (24 - START_HOUR) * 60 * 60;
@@ -154,6 +322,9 @@
             const CIRCLE_R = 20;
             const WIDTH_STAY_TIME = 50;
             const HEIGHT_STAY_TIME = 25;
+            const LOG_PREFIX = "[movement-line]";
+
+            timeSlider.max = String(TIME_INDEX_LENGTH - 1);
 
             const stateDictionary = {
                 level: {
@@ -208,16 +379,17 @@
             const LEVEL_LABELS = Object.freeze(["未取得", "レベルⅠ", "レベルⅡ", "レベルⅢ", "レベルⅣ"]);
             const WORK_LABEL_TO_CODE = Object.freeze({
                 "12時間": 0,
-                "日勤": 1,
-                "夜勤": 2,
+                日勤: 1,
+                夜勤: 2,
             });
             const LEVEL_LABEL_TO_CODE = Object.freeze({
-                "未取得": 0,
-                "レベルⅠ": 1,
-                "レベルⅡ": 2,
-                "レベルⅢ": 3,
-                "レベルⅣ": 4,
+                未取得: 0,
+                レベルⅠ: 1,
+                レベルⅡ: 2,
+                レベルⅢ: 3,
+                レベルⅣ: 4,
             });
+
             const createEmptyDayData = () => ({
                 deviceList: [],
                 beaconList: [],
@@ -230,6 +402,28 @@
                 yValues: new Int16Array(0),
                 stayValues: new Uint16Array(0),
             });
+
+            const logEvent = (level, eventName, details = {}) => {
+                const logger = typeof console[level] === "function" ? console[level] : console.log;
+                logger(LOG_PREFIX, eventName, details);
+            };
+
+            let statusTimerId = null;
+            const showStatus = (message, type = "info", durationMs = 0) => {
+                statusMessage.textContent = message;
+                statusMessage.dataset.type = type;
+                if (statusTimerId) {
+                    window.clearTimeout(statusTimerId);
+                    statusTimerId = null;
+                }
+                if (durationMs > 0) {
+                    statusTimerId = window.setTimeout(() => {
+                        statusMessage.textContent = "";
+                        statusMessage.dataset.type = "";
+                        statusTimerId = null;
+                    }, durationMs);
+                }
+            };
 
             let compactDayData = createEmptyDayData();
             let deviceList = [];
@@ -254,6 +448,9 @@
             const dayDataWorker = new Worker("./scripts/day_data_worker.js");
             let workFlagByCode = WORK_LABELS.map(() => true);
             let levelFlagByCode = LEVEL_LABELS.map(() => true);
+
+            const workButtons = new Map();
+            const levelButtons = new Map();
 
             const showLoading = () => loading.classList.remove("loaded");
             const hideLoading = () => loading.classList.add("loaded");
@@ -313,22 +510,55 @@
                 }
                 const pending = pendingWorkerRequests.get(message.requestId);
                 if (!pending) {
+                    logEvent("warn", "worker-response-without-pending-request", {
+                        requestId: message.requestId,
+                    });
                     return;
                 }
                 pendingWorkerRequests.delete(message.requestId);
+                const elapsedMs = Math.round(performance.now() - pending.requestAt);
                 if (!message.ok) {
-                    pending.reject(new Error(message.error || "Unknown worker error"));
+                    const errorMessage = message.error || "Unknown worker error";
+                    logEvent("error", "worker-load-failed", {
+                        requestId: message.requestId,
+                        dateValue: pending.dateValue,
+                        elapsedMs,
+                        error: errorMessage,
+                    });
+                    pending.reject(
+                        new Error(
+                            `[requestId=${message.requestId} date=${pending.dateValue}] ${errorMessage}`
+                        )
+                    );
                     return;
                 }
+                logEvent("info", "worker-load-succeeded", {
+                    requestId: message.requestId,
+                    dateValue: pending.dateValue,
+                    elapsedMs,
+                });
                 pending.resolve(hydrateDayData(message.dayData || {}));
             });
 
             dayDataWorker.addEventListener("error", (event) => {
-                const error = new Error(event.message || "Worker error");
-                for (const pending of pendingWorkerRequests.values()) {
-                    pending.reject(error);
+                const errorMessage = event.message || "Worker error";
+                logEvent("error", "worker-runtime-error", {
+                    error: errorMessage,
+                });
+                for (const [requestId, pending] of pendingWorkerRequests.entries()) {
+                    pending.reject(
+                        new Error(
+                            `[requestId=${requestId} date=${pending.dateValue}] ${errorMessage}`
+                        )
+                    );
                 }
                 pendingWorkerRequests.clear();
+            });
+
+            dayDataWorker.addEventListener("messageerror", (event) => {
+                logEvent("error", "worker-messageerror", {
+                    dataType: typeof event.data,
+                });
             });
 
             window.addEventListener("beforeunload", () => {
@@ -341,6 +571,12 @@
                     pendingWorkerRequests.set(requestId, {
                         resolve,
                         reject,
+                        dateValue,
+                        requestAt: performance.now(),
+                    });
+                    logEvent("info", "worker-load-requested", {
+                        requestId,
+                        dateValue,
                     });
                     dayDataWorker.postMessage({
                         type: "load-day",
@@ -366,9 +602,11 @@
                 if (dataCache.has(dateValue)) {
                     const cached = dataCache.get(dateValue);
                     touchCache(dateValue, cached);
+                    logEvent("info", "cache-hit", { dateValue });
                     return cached;
                 }
                 if (pendingLoads.has(dateValue)) {
+                    logEvent("info", "pending-load-reused", { dateValue });
                     return pendingLoads.get(dateValue);
                 }
                 const promise = (async () => {
@@ -382,7 +620,6 @@
                 return promise;
             };
 
-            // Constants
             const FP_PATH = "./data/fig/" + ward + ".jpg";
             const STAGE_DIMENSIONS = {
                 width: 1250,
@@ -392,62 +629,22 @@
                 width: 1180,
                 height: 880,
             };
-            const PANEL_X_POS = "10";
             const PANEL_HEIGHT = 120;
             const a_x = 1;
             const b_x = 0;
             const a_y = 1;
             const b_y = PANEL_HEIGHT;
 
-            // Stage and panels setup
-            let stage = d3.select(".stage").attr("width", STAGE_DIMENSIONS.width).attr("height", STAGE_DIMENSIONS.height);
+            const stage = d3
+                .select(".stage")
+                .attr("viewBox", `0 0 ${STAGE_DIMENSIONS.width} ${STAGE_DIMENSIONS.height}`)
+                .attr("preserveAspectRatio", "xMinYMin meet");
 
             stage.append("image").attr("xlink:href", FP_PATH).attr("width", IMG_DIMENSIONS.width).attr("y", PANEL_HEIGHT);
 
-            const createPanel = (stage, xPosition = 0, yPosition = 70) => {
-                return stage.append("g").attr("transform", `translate(${xPosition},${yPosition})`);
-            };
+            const circleLayer = stage.append("g").attr("class", "device-layer");
+            const stayLayer = stage.append("g").attr("class", "stay-layer");
 
-            let speedPanel = createPanel(stage);
-            let speedPanel2 = createPanel(stage);
-            let speedPanel3 = createPanel(stage);
-            let updatePanel = createPanel(stage, 10);
-            let workTimePanel = createPanel(stage, PANEL_X_POS, 100);
-            let levelPanel = createPanel(stage, PANEL_X_POS, 100);
-
-            // Time bar setup
-            let svgTimeBar = d3.select(".stage").append("svg");
-            svgTimeBar
-                .append("text")
-                .attr("class", "date_label")
-                .attr("x", 20)
-                .attr("y", 40)
-                .attr("fill", "black")
-                .attr("text-anchor", "left")
-                .text("");
-
-            let svgTimeBarFo = svgTimeBar
-                .append("foreignObject")
-                .attr("width", STAGE_DIMENSIONS.width - 300)
-                .attr("height", 60)
-                .attr("x", 300)
-                .attr("y", 20)
-                .append("xhtml:div");
-
-            // Seek bar setup
-            svgTimeBarFo
-                .append("input")
-                .attr("type", "range")
-                .attr("id", "time_slider")
-                .attr("value", "0")
-                .attr("min", "0")
-                .attr("max", String(TIME_INDEX_LENGTH - 1))
-                .attr("step", "1")
-                .attr("x", 200)
-                .attr("y", 0);
-            let timeSlider = document.getElementById("time_slider");
-
-            // Mapping functions
             const map = (value, a, b, beacon, devicePos) => {
                 return STATION_LIST.includes(beacon) ? value * a + b + devicePos : value * a + b;
             };
@@ -460,11 +657,8 @@
             const stayTimeText = (stayTime, beacon) =>
                 stayTime > 0 && !COLLIDOR_SET.has(beacon) ? BG_TEXT_STAY_TIME : BG_TEXT_STAY_TIME_CLEAR;
 
-            let svg = d3.select(".stage").append("svg");
-            let svgStayTime = d3.select(".stage").append("svg");
-
             const updateSliderText = () => {
-                svgTimeBar.select("text").text(toDateTimeLabel(timeIdx));
+                dateTimeLabel.textContent = toDateTimeLabel(timeIdx);
             };
 
             const updateDeviceStationPos = () => {
@@ -500,24 +694,33 @@
                 removeDeviceLayers();
                 for (let i = 0; i < deviceList.length; i++) {
                     const device = deviceList[i];
-                    const circle = svg.append("circle").style("stroke-width", 5).attr("r", CIRCLE_R).style("display", "none");
-                    const staffText = svg
+                    const circle = circleLayer
+                        .append("circle")
+                        .style("stroke-width", 5)
+                        .attr("r", CIRCLE_R)
+                        .style("display", "none");
+                    const staffText = circleLayer
                         .append("text")
                         .attr("class", "staff_label")
                         .attr("fill", "white")
+                        .attr("font-size", 28)
                         .attr("text-anchor", "middle")
                         .text(device.substr(6))
-                        .style("display", "none");
-                    const stayRect = svgStayTime
+                        .style("display", "none")
+                        .style("user-select", "none")
+                        .style("pointer-events", "none");
+                    const stayRect = stayLayer
                         .append("rect")
                         .attr("width", WIDTH_STAY_TIME)
                         .attr("height", HEIGHT_STAY_TIME)
                         .style("display", "none");
-                    const stayText = svgStayTime
+                    const stayText = stayLayer
                         .append("text")
-                        .attr("class", "stay_label")
+                        .attr("font-size", 18)
                         .attr("text-anchor", "middle")
-                        .style("display", "none");
+                        .style("display", "none")
+                        .style("user-select", "none")
+                        .style("pointer-events", "none");
                     deviceNodes.set(device, {
                         circle,
                         staffText,
@@ -580,7 +783,7 @@
             }
 
             function updateSlider() {
-                timeSlider.value = timeIdx;
+                timeSlider.value = String(timeIdx);
                 updateSliderText();
             }
 
@@ -589,7 +792,19 @@
                 updateSlider();
             }
 
-            // functions for speed buttons
+            const refreshPlaybackState = () => {
+                btnPlay.classList.toggle("is-active", speedState === "play");
+                btnRewind.classList.toggle("is-active", speedState === "rewind");
+                btnPause.classList.toggle("is-active", speedState === "stop");
+            };
+
+            const refreshPlaybackLabels = () => {
+                playLabel = "▶︎".repeat(playCount > 0 ? playCount : 1);
+                rewindLabel = "◀︎".repeat(rewindCount > 0 ? rewindCount : 1);
+                btnPlay.textContent = playLabel;
+                btnRewind.textContent = rewindLabel;
+            };
+
             function handleTimeChange(delta) {
                 timeIdx += delta;
                 if (timeIdx >= TIME_INDEX_LENGTH) {
@@ -603,6 +818,7 @@
             function handlePause() {
                 timer.stop();
                 speedState = "stop";
+                refreshPlaybackState();
             }
 
             function handleNext() {
@@ -628,20 +844,8 @@
                 if (playCount > 3) {
                     playCount = 1;
                 }
-                speedButtonLabels.text(function (d) {
-                    if (d.label === "play") {
-                        playLabel = "";
-                        for (let i = 0; i < playCount; i++) {
-                            playLabel += "▶︎";
-                        }
-                        return playLabel;
-                    } else if (d.label === "rewind") {
-                        return rewindLabel;
-                    } else {
-                        return d.label;
-                    }
-                });
-
+                refreshPlaybackLabels();
+                refreshPlaybackState();
                 timer = d3.interval(function () {
                     handleNext();
                 }, 1000 / (FPS * playCount));
@@ -654,271 +858,84 @@
                 if (rewindCount > 3) {
                     rewindCount = 1;
                 }
-                speedButtonLabels.text(function (d) {
-                    if (d.label === "rewind") {
-                        rewindLabel = "";
-                        for (let i = 0; i < rewindCount; i++) {
-                            rewindLabel += "◀︎";
-                        }
-                        return rewindLabel;
-                    } else if (d.label === "play") {
-                        return playLabel;
-                    } else {
-                        return d.label;
-                    }
-                });
+                refreshPlaybackLabels();
+                refreshPlaybackState();
                 timer = d3.interval(function () {
                     handlePrev();
                 }, 1000 / (FPS * rewindCount));
             }
 
-            // Buttons setup
-            const BUTTON_X = STAGE_DIMENSIONS.width * 0.25;
-            const BUTTON_Y = 0 * STAGE_DIMENSIONS.height;
-            const BUTTON_WIDTH = 110;
-            const BUTTON_HEIGHT = 40;
-            const BUTTON_SEP = BUTTON_WIDTH + 20;
-
-            const BUTTON_COLOR = "#ffeecc";
-            const BUTTON_MOUSE_OVER_COLOR = "#ff8888";
-            const SPEED_BUTTON_DATA = [
-                {
-                    label: "30分戻る",
-                    call_back: handlePrev30min,
-                    color: BUTTON_COLOR,
-                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
-                },
-                {
-                    label: "rewind",
-                    call_back: handleRewind,
-                    color: BUTTON_COLOR,
-                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
-                },
-                {
-                    label: "◼︎",
-                    call_back: handlePause,
-                    color: BUTTON_COLOR,
-                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
-                },
-                {
-                    label: "play",
-                    call_back: handlePlay,
-                    color: BUTTON_COLOR,
-                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
-                },
-                {
-                    label: "30分進む",
-                    call_back: handleNext30min,
-                    color: BUTTON_COLOR,
-                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
-                },
-            ];
-
-            speedPanel
-                .selectAll(".button")
-                .data(SPEED_BUTTON_DATA)
-                .enter()
-                .append("rect")
-                .attr("transform", function (d, i) {
-                    return "translate(" + (BUTTON_X + BUTTON_SEP * i) + ", " + BUTTON_Y + ")";
-                })
-                .attr("class", "button")
-                .attr("fill", function (d) {
-                    return d.color;
-                })
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", BUTTON_WIDTH)
-                .attr("height", BUTTON_HEIGHT)
-                .on("mouseover", function (d) {
-                    d3.select(this).attr("fill", d.mouse_over_color);
-                })
-                .on("mouseout", function (d) {
-                    d3.select(this).attr("fill", d.color);
-                })
-                .on("click", function (d) {
-                    if (d.label === "play" || d.label === "rewind") {
-                        d.call_back(1);
-                    } else {
-                        d.call_back();
+            const refreshWorkButtonStyles = () => {
+                WORK_LABELS.forEach((label) => {
+                    const button = workButtons.get(label);
+                    if (!button) {
+                        return;
                     }
+                    const enabled = stateDictionary.work.flag[label];
+                    button.style.backgroundColor = enabled
+                        ? stateDictionary.work.active[label]
+                        : stateDictionary.work.inactive[label];
+                    button.setAttribute("aria-pressed", enabled ? "true" : "false");
                 });
+            };
 
-            let speedButtonLabels = speedPanel
-                .selectAll(".button_label")
-                .data(SPEED_BUTTON_DATA)
-                .enter()
-                .append("text")
-                .text(function (d) {
-                    if (d.label === "play") {
-                        return playLabel;
-                    } else if (d.label === "rewind") {
-                        return rewindLabel;
-                    } else {
-                        return d.label;
+            const refreshLevelButtonStyles = () => {
+                LEVEL_LABELS.forEach((label) => {
+                    const button = levelButtons.get(label);
+                    if (!button) {
+                        return;
                     }
-                })
-                .attr("transform", function (d, i) {
-                    return "translate(" + (BUTTON_X + BUTTON_SEP * i) + ", " + BUTTON_Y + ")";
-                })
-                .attr("class", "button_label")
-                .attr("fill", "black")
-                .attr("x", 0.5 * BUTTON_WIDTH)
-                .attr("y", 0.67 * BUTTON_HEIGHT)
-                .attr("text-anchor", "middle");
-
-            const WORK_TIME_BUTTON_X = 0;
-            const WORK_TIME_BUTTON_Y = 550;
-            const BUTTON_V_SEP = BUTTON_HEIGHT + 10;
+                    const enabled = stateDictionary.level.flag[label];
+                    button.style.backgroundColor = enabled
+                        ? stateDictionary.level.active[label]
+                        : stateDictionary.level.inactive[label];
+                    button.setAttribute("aria-pressed", enabled ? "true" : "false");
+                });
+            };
 
             function updateWorkTimeState(work_time) {
                 stateDictionary.work.flag[work_time] = !stateDictionary.work.flag[work_time];
                 workFlagByCode[WORK_LABEL_TO_CODE[work_time]] = stateDictionary.work.flag[work_time];
-                workTimeButtons.attr("fill", function (d) {
-                    if (stateDictionary.work.flag[d.label]) {
-                        return stateDictionary.work.active[d.label];
-                    } else {
-                        return stateDictionary.work.inactive[d.label];
-                    }
-                });
+                refreshWorkButtonStyles();
                 updateAll();
             }
-
-            const WORK_TIME_BUTTON_DATA = [
-                {
-                    label: "日勤",
-                    call_back: updateWorkTimeState,
-                },
-                {
-                    label: "12時間",
-                    call_back: updateWorkTimeState,
-                },
-                {
-                    label: "夜勤",
-                    call_back: updateWorkTimeState,
-                },
-            ];
-
-            let workTimeButtons = workTimePanel
-                .selectAll(".button")
-                .data(WORK_TIME_BUTTON_DATA)
-                .enter()
-                .append("rect")
-                .attr("transform", function (d, i) {
-                    return "translate(" + WORK_TIME_BUTTON_X + ", " + (WORK_TIME_BUTTON_Y + BUTTON_V_SEP * i) + ")";
-                })
-                .attr("class", "button")
-                .attr("fill", function (d) {
-                    if (stateDictionary.work.flag[d.label]) {
-                        return stateDictionary.work.active[d.label];
-                    } else {
-                        return stateDictionary.work.inactive[d.label];
-                    }
-                })
-                .attr("x", 1000)
-                .attr("y", 0)
-                .attr("width", BUTTON_WIDTH)
-                .attr("height", BUTTON_HEIGHT)
-                .on("click", function (d) {
-                    d.call_back(d.label);
-                });
-
-            workTimePanel
-                .selectAll(".button_label")
-                .data(WORK_TIME_BUTTON_DATA)
-                .enter()
-                .append("text")
-                .text(function (d) {
-                    return d.label;
-                })
-                .attr("transform", function (d, i) {
-                    return "translate(" + WORK_TIME_BUTTON_X + ", " + (WORK_TIME_BUTTON_Y + BUTTON_V_SEP * i) + ")";
-                })
-                .attr("class", "button_label")
-                .attr("fill", "white")
-                .attr("x", 1000 + 0.5 * BUTTON_WIDTH)
-                .attr("y", 0.67 * BUTTON_HEIGHT)
-                .attr("text-anchor", "middle");
-
-            const LEVEL_BUTTON_X = 0;
-            const LEVEL_BUTTON_Y = 50;
 
             function updateLevelState(level) {
                 stateDictionary.level.flag[level] = !stateDictionary.level.flag[level];
                 levelFlagByCode[LEVEL_LABEL_TO_CODE[level]] = stateDictionary.level.flag[level];
-                levelButtons.attr("fill", function (d) {
-                    if (stateDictionary.level.flag[d.label]) {
-                        return stateDictionary.level.active[d.label];
-                    } else {
-                        return stateDictionary.level.inactive[d.label];
-                    }
-                });
+                refreshLevelButtonStyles();
                 updateAll();
             }
 
-            const LEVEL_BUTTON_DATA = [
-                {
-                    label: "未取得",
-                    call_back: updateLevelState,
-                },
-                {
-                    label: "レベルⅠ",
-                    call_back: updateLevelState,
-                },
-                {
-                    label: "レベルⅡ",
-                    call_back: updateLevelState,
-                },
-                {
-                    label: "レベルⅢ",
-                    call_back: updateLevelState,
-                },
-                {
-                    label: "レベルⅣ",
-                    call_back: updateLevelState,
-                },
-            ];
-
-            let levelButtons = levelPanel
-                .selectAll(".button")
-                .data(LEVEL_BUTTON_DATA)
-                .enter()
-                .append("rect")
-                .attr("transform", function (d, i) {
-                    return "translate(" + LEVEL_BUTTON_X + ", " + (LEVEL_BUTTON_Y + BUTTON_V_SEP * i) + ")";
-                })
-                .attr("class", "button")
-                .attr("fill", function (d) {
-                    if (stateDictionary.level.flag[d.label]) {
-                        return stateDictionary.level.active[d.label];
-                    } else {
-                        return stateDictionary.level.inactive[d.label];
-                    }
-                })
-                .attr("x", 1000)
-                .attr("y", 200)
-                .attr("width", BUTTON_WIDTH)
-                .attr("height", BUTTON_HEIGHT)
-                .on("click", function (d) {
-                    d.call_back(d.label);
+            WORK_LABELS.forEach((label) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "filter-button";
+                button.textContent = label;
+                button.addEventListener("click", () => {
+                    updateWorkTimeState(label);
                 });
+                workFilterControls.appendChild(button);
+                workButtons.set(label, button);
+            });
 
-            levelPanel
-                .selectAll(".button_label")
-                .data(LEVEL_BUTTON_DATA)
-                .enter()
-                .append("text")
-                .text(function (d) {
-                    return d.label;
-                })
-                .attr("transform", function (d, i) {
-                    return "translate(" + LEVEL_BUTTON_X + ", " + (LEVEL_BUTTON_Y + BUTTON_V_SEP * i) + ")";
-                })
-                .attr("class", "button_label")
-                .attr("fill", "white")
-                .attr("x", 1000 + 0.5 * BUTTON_WIDTH)
-                .attr("y", 200 + 0.67 * BUTTON_HEIGHT)
-                .attr("text-anchor", "middle");
+            LEVEL_LABELS.forEach((label) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "filter-button";
+                button.textContent = label;
+                button.addEventListener("click", () => {
+                    updateLevelState(label);
+                });
+                levelFilterControls.appendChild(button);
+                levelButtons.set(label, button);
+            });
+
+            btnPrev30min.addEventListener("click", handlePrev30min);
+            btnNext30min.addEventListener("click", handleNext30min);
+            btnPause.addEventListener("click", handlePause);
+            btnPlay.addEventListener("click", () => handlePlay(1));
+            btnRewind.addEventListener("click", () => handleRewind(1));
 
             const prefetchNeighborDates = () => {
                 const currentIdx = selectDate.selectedIndex;
@@ -932,7 +949,12 @@
                     if (dataCache.has(candidate) || pendingLoads.has(candidate)) {
                         continue;
                     }
-                    loadDayData(candidate).catch(() => {});
+                    loadDayData(candidate).catch((error) => {
+                        logEvent("warn", "prefetch-failed", {
+                            dateValue: candidate,
+                            error: error instanceof Error ? error.message : String(error),
+                        });
+                    });
                 }
             };
 
@@ -951,16 +973,36 @@
                 const token = ++dateSwitchToken;
                 handlePause();
                 showLoading();
+                showStatus(`${dateValue} のデータを読み込み中...`, "loading");
+                logEvent("info", "switch-date-started", {
+                    dateValue,
+                    token,
+                });
                 try {
                     const dayData = await loadDayData(dateValue);
                     if (token !== dateSwitchToken) {
+                        logEvent("info", "switch-date-superseded", {
+                            dateValue,
+                            token,
+                            latestToken: dateSwitchToken,
+                        });
                         return;
                     }
                     applyDayData(dateValue, dayData);
                     prefetchNeighborDates();
+                    showStatus(`${dateValue} を表示中`, "success", 2500);
+                    logEvent("info", "switch-date-completed", {
+                        dateValue,
+                        token,
+                    });
                 } catch (error) {
-                    console.error(error);
-                    alert(`データ読み込みに失敗しました: ${dateValue}`);
+                    const message = error instanceof Error ? error.message : String(error);
+                    logEvent("error", "switch-date-failed", {
+                        dateValue,
+                        token,
+                        error: message,
+                    });
+                    showStatus(`データ読み込みに失敗しました: ${dateValue}`, "error", 7000);
                 } finally {
                     if (token === dateSwitchToken) {
                         hideLoading();
@@ -978,8 +1020,14 @@
                 switchDate(selectDate.options[idx].value);
             });
 
+            refreshPlaybackLabels();
+            refreshPlaybackState();
+            refreshWorkButtonStyles();
+            refreshLevelButtonStyles();
+
             const idx = selectDate.selectedIndex;
             switchDate(selectDate.options[idx].value);
         }
     </script>
 </body>
+</html>
