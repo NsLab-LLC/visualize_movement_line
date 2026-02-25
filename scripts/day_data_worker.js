@@ -32,7 +32,8 @@ const toUint16 = (value) => {
 };
 
 const fetchText = async (path) => {
-    const response = await fetch(path, { cache: "force-cache" });
+    // App-level cache (dataCache) is managed in main thread; avoid stale HTTP cache here.
+    const response = await fetch(path, { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`Failed to fetch ${path}: ${response.status}`);
     }
@@ -50,6 +51,9 @@ const parseAssignedArray = (sourceText) => {
     }
     return JSON.parse(payload);
 };
+
+const resolveDataFileUrl = (ward, dateValue, fileSuffix) =>
+    new URL(`../data/js/${ward}/${dateValue}_${fileSuffix}.js`, self.location.href).toString();
 
 const addCode = (map, list, key) => {
     let code = map.get(key);
@@ -155,8 +159,8 @@ const buildCompactDayData = (rows1, rows2, timeIndexLength) => {
 };
 
 const loadDayData = async (ward, dateValue, timeIndexLength) => {
-    const file1 = `./data/js/${ward}/${dateValue}_1.js`;
-    const file2 = `./data/js/${ward}/${dateValue}_2.js`;
+    const file1 = resolveDataFileUrl(ward, dateValue, "1");
+    const file2 = resolveDataFileUrl(ward, dateValue, "2");
     const [text1, text2] = await Promise.all([fetchText(file1), fetchText(file2)]);
     const rows1 = parseAssignedArray(text1);
     const rows2 = parseAssignedArray(text2);

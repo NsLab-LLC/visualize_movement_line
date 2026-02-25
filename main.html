@@ -1,203 +1,64 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8" />
+<meta charset="UTF-8" />
+
+<style>
+    body {
+        background-color: #eeeeee;
+    }
+</style>
+
+<body>
     <style>
-        :root {
-            --bg-page: #f2f4f7;
-            --bg-panel: #ffffff;
-            --bg-stage: #ffffff;
-            --border-subtle: #d0d7de;
-            --text-primary: #1f2328;
-            --text-muted: #57606a;
-            --focus-ring: #2563eb;
-            --button-bg: #fef3c7;
-            --button-hover: #f59e0b;
-            --status-info: #0f172a;
-            --status-loading: #1d4ed8;
-            --status-success: #065f46;
-            --status-error: #b91c1c;
+        .stage {
+            margin: 20px 0px 0px 100px;
+            background-color: #ffffff;
         }
 
-        * {
-            box-sizing: border-box;
+        .button_label,
+        .date_label {
+            font: 24px sans-serif;
         }
 
-        body {
-            margin: 0;
-            background-color: var(--bg-page);
-            color: var(--text-primary);
-            font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+        .stay_label {
+            font: 18px sans-serif;
         }
 
-        .app-shell {
-            max-width: 1360px;
-            margin: 0 auto;
-            padding: clamp(12px, 2vw, 24px);
-            display: grid;
-            gap: clamp(12px, 2vw, 20px);
-        }
-
-        .control-panel {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: clamp(12px, 2vw, 18px);
-            display: grid;
-            gap: 14px;
-        }
-
-        .control-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .control-field {
-            display: grid;
-            gap: 6px;
-        }
-
-        .field-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
+        .staff_label {
+            font: 28px sans-serif;
         }
 
         .custom-select {
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            font-size: clamp(16px, 1.6vw, 20px);
-            padding: 0.45em 0.7em;
-            min-width: 9em;
+            border: solid 1px #999999;
+            box-sizing: border-box;
+        }
+
+        svg text {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        select {
+            font: 20px sans-serif;
+            border-radius: 5px;
+            width: 7em;
+            padding: 0.5em;
+            margin-left: 5em;
+            border: none;
+            box-shadow: none;
             background: #fff;
-            color: var(--text-primary);
-        }
-
-        .date-label {
-            margin: 0;
-            min-width: 12em;
-            font-size: clamp(16px, 2.1vw, 24px);
-            font-weight: 700;
-        }
-
-        #time_slider {
-            width: min(100%, 980px);
-            height: 18px;
+            text-align: -webkit-center;
+            -webkit-appearance: none;
+            outline: none;
             cursor: pointer;
-        }
-
-        #time_slider:focus-visible,
-        button:focus-visible,
-        select:focus-visible {
-            outline: 3px solid var(--focus-ring);
-            outline-offset: 2px;
-        }
-
-        .status-message {
-            margin: 0;
-            font-size: 14px;
-            min-height: 1.3em;
-            color: var(--status-info);
-            flex: 1 1 250px;
-            text-align: right;
-        }
-
-        .status-message[data-type="loading"] {
-            color: var(--status-loading);
-        }
-
-        .status-message[data-type="success"] {
-            color: var(--status-success);
-        }
-
-        .status-message[data-type="error"] {
-            color: var(--status-error);
-            font-weight: 700;
-        }
-
-        .control-grid {
-            display: grid;
-            gap: 12px;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .control-group {
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            padding: 10px;
-            background: #f8fafc;
-            min-height: 100%;
-        }
-
-        .group-title {
-            margin: 0 0 8px;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-muted);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .button-group.vertical {
-            display: grid;
-            gap: 8px;
-        }
-
-        .control-button,
-        .filter-button {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 9px 10px;
-            font-size: clamp(14px, 1.5vw, 18px);
-            line-height: 1.1;
-            cursor: pointer;
-            transition: background-color 120ms ease-in-out, transform 80ms ease-in-out;
-        }
-
-        .control-button {
-            background-color: var(--button-bg);
-            color: var(--text-primary);
-            min-width: 96px;
-        }
-
-        .control-button:hover {
-            background-color: var(--button-hover);
-        }
-
-        .control-button.is-active {
-            border-color: #1d4ed8;
-            box-shadow: 0 0 0 1px #1d4ed8;
-        }
-
-        .control-button:active,
-        .filter-button:active {
-            transform: scale(0.98);
-        }
-
-        .filter-button {
-            color: #fff;
-            font-weight: 700;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
-        }
-
-        .stage {
-            width: 100%;
-            height: auto;
-            background-color: var(--bg-stage);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
         }
 
         #loading {
             width: 100%;
             height: 100%;
-            transition: opacity 300ms ease;
+            transition: all 1s;
             background-color: rgba(240, 248, 255, 0.6);
             position: fixed;
             top: 0;
@@ -206,9 +67,9 @@
         }
 
         .spinner {
-            width: 120px;
-            height: 120px;
-            margin: min(30vh, 280px) auto;
+            width: 200px;
+            height: 200px;
+            margin: 300px auto;
             background-color: #fff;
             border-radius: 100%;
             animation: sk-scaleout 1s infinite ease-in-out;
@@ -223,73 +84,956 @@
             0% {
                 transform: scale(0);
             }
-
             100% {
                 transform: scale(1);
                 opacity: 0;
             }
         }
 
-        @media (max-width: 1024px) {
-            .control-grid {
-                grid-template-columns: 1fr;
-            }
+        input[type="range"] {
+            margin: auto;
+            -webkit-appearance: none;
+            position: relative;
+            overflow: hidden;
+            height: 20px;
+            width: 800px;
+            cursor: pointer;
+            border-radius: 0;
+        }
 
-            .status-message {
-                text-align: left;
-            }
+        ::-webkit-slider-runnable-track {
+            background: #eee;
+        }
+
+        ::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 40px;
+            background: #fff;
+            box-shadow: -400px 0 0 400px dodgerblue;
+            border: 1px solid dodgerblue;
         }
     </style>
-</head>
-<body>
-    <div class="app-shell">
-        <header class="control-panel">
-            <div class="control-row">
-                <div class="control-field">
-                    <label for="date1" class="field-label">日付</label>
-                    <select id="date1" class="custom-select" name="date1"></select>
-                </div>
-                <p id="status_message" class="status-message" data-type="" aria-live="polite"></p>
-            </div>
 
-            <div class="control-row">
-                <p id="date_time_label" class="date-label"></p>
-                <input type="range" id="time_slider" value="0" min="0" step="1" />
-            </div>
+    <script src="d3.js"></script>
+    <script src="https://d3js.org/d3-timer.v1.min.js"></script>
+    <script>
+        let ward = "test";
 
-            <div class="control-grid">
-                <section class="control-group" aria-label="再生コントロール">
-                    <h2 class="group-title">再生</h2>
-                    <div class="button-group">
-                        <button id="btn_prev_30min" class="control-button" type="button">30分戻る</button>
-                        <button id="btn_rewind" class="control-button" type="button">◀︎</button>
-                        <button id="btn_pause" class="control-button" type="button">◼︎</button>
-                        <button id="btn_play" class="control-button" type="button">▶︎</button>
-                        <button id="btn_next_30min" class="control-button" type="button">30分進む</button>
-                    </div>
-                </section>
+        let div1 = document.createElement("div");
+        div1.id = "div1";
 
-                <section class="control-group" aria-label="勤務帯フィルタ">
-                    <h2 class="group-title">勤務帯</h2>
-                    <div id="work_filter_controls" class="button-group vertical"></div>
-                </section>
+        let selectDate = document.createElement("select");
+        selectDate.className = "custom-select";
+        selectDate.id = "date1";
+        selectDate.name = "date1";
+        for (let i = 15; i < 16; i++) {
+            let option_str = "2023-03-" + String(i).padStart(2, "0");
+            selectDate.add(new Option(option_str, option_str));
+        }
+        div1.appendChild(selectDate);
+        document.body.appendChild(div1);
+    </script>
 
-                <section class="control-group" aria-label="レベルフィルタ">
-                    <h2 class="group-title">レベル</h2>
-                    <div id="level_filter_controls" class="button-group vertical"></div>
-                </section>
-            </div>
-        </header>
-
-        <svg class="stage"></svg>
-    </div>
-
+    <svg class="stage"></svg>
     <div id="loading" class="loaded">
         <div class="spinner"></div>
     </div>
 
-    <script src="d3.js"></script>
-    <script src="./scripts/filter_constants.js"></script>
-    <script src="./scripts/main_app.js"></script>
+    <script type="text/javascript">
+        startVisualize();
+
+        function startVisualize() {
+            const loading = document.getElementById("loading");
+            const selectDate = document.getElementById("date1");
+            const TIME_INDEX_LENGTH = 26 * 60 * 60;
+            const START_HOUR = 8;
+            const DAY_BOUNDARY_INDEX = (24 - START_HOUR) * 60 * 60;
+            const FPS = 10;
+            const DATA_CACHE_LIMIT = 3;
+            const CIRCLE_R = 20;
+            const WIDTH_STAY_TIME = 50;
+            const HEIGHT_STAY_TIME = 25;
+
+            const stateDictionary = {
+                level: {
+                    active: {
+                        未取得: "rgb(255, 0, 0, 1)",
+                        レベルⅠ: "rgb(0, 0, 255, 1)",
+                        レベルⅡ: "rgb(0, 128, 0, 1)",
+                        レベルⅢ: "rgb(128, 0, 128, 1)",
+                        レベルⅣ: "rgb(0, 0, 0, 1)",
+                    },
+                    inactive: {
+                        未取得: "rgb(255, 0, 0, 0.3)",
+                        レベルⅠ: "rgb(0, 0, 255, 0.3)",
+                        レベルⅡ: "rgb(0, 128, 0, 0.3)",
+                        レベルⅢ: "rgb(128, 0, 128, 0.3)",
+                        レベルⅣ: "rgb(0, 0, 0, 0.3)",
+                    },
+                    flag: {
+                        未取得: true,
+                        レベルⅠ: true,
+                        レベルⅡ: true,
+                        レベルⅢ: true,
+                        レベルⅣ: true,
+                    },
+                },
+                work: {
+                    active: {
+                        "12時間": "rgb(250,128,114, 1)",
+                        日勤: "rgb(255, 140, 0, 1)",
+                        夜勤: "rgb(100,149,237, 1)",
+                    },
+                    inactive: {
+                        "12時間": "rgb(250,128,114, 0.3)",
+                        日勤: "rgb(255, 140, 0, 0.3)",
+                        夜勤: "rgb(100,149,237, 0.3)",
+                    },
+                    flag: {
+                        "12時間": true,
+                        日勤: true,
+                        夜勤: true,
+                    },
+                },
+            };
+
+            const STATION_LIST = ["beacon56", "beacon57", "beacon58"];
+            const COLLIDOR_SET = new Set(Array.from({ length: 56 - 36 }, (_, i) => `beacon${i + 36}`));
+            const BG_STAY_TIME = "rgb(255, 255, 255, 1)";
+            const BG_STAY_TIME_CLEAR = "rgb(255, 255, 255, 0)";
+            const BG_TEXT_STAY_TIME = "rgb(0, 0, 0, 1)";
+            const BG_TEXT_STAY_TIME_CLEAR = "rgb(0, 0, 0, 0)";
+            const WORK_LABELS = Object.freeze(["12時間", "日勤", "夜勤"]);
+            const LEVEL_LABELS = Object.freeze(["未取得", "レベルⅠ", "レベルⅡ", "レベルⅢ", "レベルⅣ"]);
+            const WORK_LABEL_TO_CODE = Object.freeze({
+                "12時間": 0,
+                "日勤": 1,
+                "夜勤": 2,
+            });
+            const LEVEL_LABEL_TO_CODE = Object.freeze({
+                "未取得": 0,
+                "レベルⅠ": 1,
+                "レベルⅡ": 2,
+                "レベルⅢ": 3,
+                "レベルⅣ": 4,
+            });
+            const createEmptyDayData = () => ({
+                deviceList: [],
+                beaconList: [],
+                offsets: new Uint32Array(TIME_INDEX_LENGTH + 1),
+                deviceCodes: new Uint16Array(0),
+                beaconCodes: new Uint16Array(0),
+                levelCodes: new Uint8Array(0),
+                workCodes: new Uint8Array(0),
+                xValues: new Int16Array(0),
+                yValues: new Int16Array(0),
+                stayValues: new Uint16Array(0),
+            });
+
+            let compactDayData = createEmptyDayData();
+            let deviceList = [];
+            let deviceStationPos = {};
+            let activeDateLabel = "";
+            let nextDateLabel = "";
+            let timeIdx = 0;
+            let timer = d3.timeout(() => {}, 1);
+            let playLabel = "▶︎";
+            let rewindLabel = "◀︎";
+            let speedState = "stop";
+            let speedButtons = null;
+            let playCount = 0;
+            let rewindCount = 0;
+            let dateSwitchToken = 0;
+            let loadRequestId = 0;
+
+            const dataCache = new Map();
+            const pendingLoads = new Map();
+            const deviceNodes = new Map();
+            const visibleByDevice = new Map();
+            const pendingWorkerRequests = new Map();
+            const dayDataWorker = new Worker("./scripts/day_data_worker.js");
+            let workFlagByCode = WORK_LABELS.map(() => true);
+            let levelFlagByCode = LEVEL_LABELS.map(() => true);
+
+            const showLoading = () => loading.classList.remove("loaded");
+            const hideLoading = () => loading.classList.add("loaded");
+            const syncFilterCodeFlags = () => {
+                workFlagByCode = WORK_LABELS.map((label) => Boolean(stateDictionary.work.flag[label]));
+                levelFlagByCode = LEVEL_LABELS.map((label) => Boolean(stateDictionary.level.flag[label]));
+            };
+            syncFilterCodeFlags();
+
+            function formatDate(date, format) {
+                format = format.replace(/yyyy/g, date.getFullYear());
+                format = format.replace(/MM/g, ("0" + (date.getMonth() + 1)).slice(-2));
+                format = format.replace(/dd/g, ("0" + date.getDate()).slice(-2));
+                format = format.replace(/HH/g, ("0" + date.getHours()).slice(-2));
+                format = format.replace(/mm/g, ("0" + date.getMinutes()).slice(-2));
+                format = format.replace(/ss/g, ("0" + date.getSeconds()).slice(-2));
+                format = format.replace(/SSS/g, ("00" + date.getMilliseconds()).slice(-3));
+                return format;
+            }
+
+            const toTimeLabel = (index) => {
+                const sec = (index + START_HOUR * 60 * 60) % (24 * 60 * 60);
+                const hh = Math.floor(sec / 3600);
+                const mm = Math.floor((sec % 3600) / 60);
+                const ss = sec % 60;
+                return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+            };
+
+            const toDateLabel = (index) => (index < DAY_BOUNDARY_INDEX ? activeDateLabel : nextDateLabel);
+            const toDateTimeLabel = (index) => `${toDateLabel(index)} ${toTimeLabel(index)}`;
+
+            const setDateContext = (dateValue) => {
+                let dateDay = new Date(dateValue);
+                let dateNight = new Date(dateValue);
+                dateNight.setDate(dateNight.getDate() + 1);
+                activeDateLabel = formatDate(dateDay, "yyyy-MM-dd");
+                nextDateLabel = formatDate(dateNight, "yyyy-MM-dd");
+            };
+
+            const hydrateDayData = (workerDayData) => ({
+                deviceList: workerDayData.deviceList || [],
+                beaconList: workerDayData.beaconList || [],
+                offsets: workerDayData.offsets || new Uint32Array(TIME_INDEX_LENGTH + 1),
+                deviceCodes: workerDayData.deviceCodes || new Uint16Array(0),
+                beaconCodes: workerDayData.beaconCodes || new Uint16Array(0),
+                levelCodes: workerDayData.levelCodes || new Uint8Array(0),
+                workCodes: workerDayData.workCodes || new Uint8Array(0),
+                xValues: workerDayData.xValues || new Int16Array(0),
+                yValues: workerDayData.yValues || new Int16Array(0),
+                stayValues: workerDayData.stayValues || new Uint16Array(0),
+            });
+
+            dayDataWorker.addEventListener("message", (event) => {
+                const message = event.data || {};
+                if (message.type !== "load-day-result") {
+                    return;
+                }
+                const pending = pendingWorkerRequests.get(message.requestId);
+                if (!pending) {
+                    return;
+                }
+                pendingWorkerRequests.delete(message.requestId);
+                if (!message.ok) {
+                    pending.reject(new Error(message.error || "Unknown worker error"));
+                    return;
+                }
+                pending.resolve(hydrateDayData(message.dayData || {}));
+            });
+
+            dayDataWorker.addEventListener("error", (event) => {
+                const error = new Error(event.message || "Worker error");
+                for (const pending of pendingWorkerRequests.values()) {
+                    pending.reject(error);
+                }
+                pendingWorkerRequests.clear();
+            });
+
+            window.addEventListener("beforeunload", () => {
+                dayDataWorker.terminate();
+            });
+
+            const requestDayData = (dateValue) =>
+                new Promise((resolve, reject) => {
+                    const requestId = ++loadRequestId;
+                    pendingWorkerRequests.set(requestId, {
+                        resolve,
+                        reject,
+                    });
+                    dayDataWorker.postMessage({
+                        type: "load-day",
+                        requestId,
+                        ward,
+                        dateValue,
+                        timeIndexLength: TIME_INDEX_LENGTH,
+                    });
+                });
+
+            const touchCache = (dateValue, value) => {
+                if (dataCache.has(dateValue)) {
+                    dataCache.delete(dateValue);
+                }
+                dataCache.set(dateValue, value);
+                while (dataCache.size > DATA_CACHE_LIMIT) {
+                    const oldestKey = dataCache.keys().next().value;
+                    dataCache.delete(oldestKey);
+                }
+            };
+
+            const loadDayData = async (dateValue) => {
+                if (dataCache.has(dateValue)) {
+                    const cached = dataCache.get(dateValue);
+                    touchCache(dateValue, cached);
+                    return cached;
+                }
+                if (pendingLoads.has(dateValue)) {
+                    return pendingLoads.get(dateValue);
+                }
+                const promise = (async () => {
+                    const dayData = await requestDayData(dateValue);
+                    touchCache(dateValue, dayData);
+                    return dayData;
+                })().finally(() => {
+                    pendingLoads.delete(dateValue);
+                });
+                pendingLoads.set(dateValue, promise);
+                return promise;
+            };
+
+            // Constants
+            const FP_PATH = "./data/fig/" + ward + ".jpg";
+            const STAGE_DIMENSIONS = {
+                width: 1250,
+                height: 1000,
+            };
+            const IMG_DIMENSIONS = {
+                width: 1180,
+                height: 880,
+            };
+            const PANEL_X_POS = "10";
+            const PANEL_HEIGHT = 120;
+            const a_x = 1;
+            const b_x = 0;
+            const a_y = 1;
+            const b_y = PANEL_HEIGHT;
+
+            // Stage and panels setup
+            let stage = d3.select(".stage").attr("width", STAGE_DIMENSIONS.width).attr("height", STAGE_DIMENSIONS.height);
+
+            stage.append("image").attr("xlink:href", FP_PATH).attr("width", IMG_DIMENSIONS.width).attr("y", PANEL_HEIGHT);
+
+            const createPanel = (stage, xPosition = 0, yPosition = 70) => {
+                return stage.append("g").attr("transform", `translate(${xPosition},${yPosition})`);
+            };
+
+            let speedPanel = createPanel(stage);
+            let speedPanel2 = createPanel(stage);
+            let speedPanel3 = createPanel(stage);
+            let updatePanel = createPanel(stage, 10);
+            let workTimePanel = createPanel(stage, PANEL_X_POS, 100);
+            let levelPanel = createPanel(stage, PANEL_X_POS, 100);
+
+            // Time bar setup
+            let svgTimeBar = d3.select(".stage").append("svg");
+            svgTimeBar
+                .append("text")
+                .attr("class", "date_label")
+                .attr("x", 20)
+                .attr("y", 40)
+                .attr("fill", "black")
+                .attr("text-anchor", "left")
+                .text("");
+
+            let svgTimeBarFo = svgTimeBar
+                .append("foreignObject")
+                .attr("width", STAGE_DIMENSIONS.width - 300)
+                .attr("height", 60)
+                .attr("x", 300)
+                .attr("y", 20)
+                .append("xhtml:div");
+
+            // Seek bar setup
+            svgTimeBarFo
+                .append("input")
+                .attr("type", "range")
+                .attr("id", "time_slider")
+                .attr("value", "0")
+                .attr("min", "0")
+                .attr("max", String(TIME_INDEX_LENGTH - 1))
+                .attr("step", "1")
+                .attr("x", 200)
+                .attr("y", 0);
+            let timeSlider = document.getElementById("time_slider");
+
+            // Mapping functions
+            const map = (value, a, b, beacon, devicePos) => {
+                return STATION_LIST.includes(beacon) ? value * a + b + devicePos : value * a + b;
+            };
+            const getDevicePos = (device) => deviceStationPos[device] || [0, 0];
+            const xMap = (x, device, beacon) => map(x, a_x, b_x, beacon, getDevicePos(device)[0]);
+            const yMap = (y, device, beacon) => map(y, a_y, b_y, beacon, getDevicePos(device)[1]);
+
+            const stayTimeBg = (stayTime, beacon) =>
+                stayTime > 0 && !COLLIDOR_SET.has(beacon) ? BG_STAY_TIME : BG_STAY_TIME_CLEAR;
+            const stayTimeText = (stayTime, beacon) =>
+                stayTime > 0 && !COLLIDOR_SET.has(beacon) ? BG_TEXT_STAY_TIME : BG_TEXT_STAY_TIME_CLEAR;
+
+            let svg = d3.select(".stage").append("svg");
+            let svgStayTime = d3.select(".stage").append("svg");
+
+            const updateSliderText = () => {
+                svgTimeBar.select("text").text(toDateTimeLabel(timeIdx));
+            };
+
+            const updateDeviceStationPos = () => {
+                const COL_NUM = 4;
+                deviceStationPos = {};
+                for (let i = 0; i < deviceList.length; i++) {
+                    const device = deviceList[i];
+                    const x_idx = i % COL_NUM;
+                    const y_idx = Math.floor(i / COL_NUM);
+                    deviceStationPos[device] = [CIRCLE_R * 2.25 * x_idx, CIRCLE_R * -2.5 * y_idx];
+                }
+            };
+
+            const removeDeviceLayers = () => {
+                for (const nodes of deviceNodes.values()) {
+                    nodes.circle.remove();
+                    nodes.staffText.remove();
+                    nodes.stayRect.remove();
+                    nodes.stayText.remove();
+                }
+                deviceNodes.clear();
+            };
+
+            const setNodeVisible = (nodes, visible) => {
+                if (!visible) {
+                    nodes.circle.interrupt();
+                    nodes.staffText.interrupt();
+                    nodes.stayRect.interrupt();
+                    nodes.stayText.interrupt();
+                }
+                const display = visible ? null : "none";
+                nodes.circle.style("display", display);
+                nodes.staffText.style("display", display);
+                nodes.stayRect.style("display", display);
+                nodes.stayText.style("display", display);
+            };
+
+            const getTransitionDurationMs = () => {
+                const baseDuration = 250;
+                let speedScale = 1;
+                if (speedState === "play") {
+                    speedScale = playCount > 0 ? playCount : 1;
+                } else if (speedState === "rewind") {
+                    speedScale = rewindCount > 0 ? rewindCount : 1;
+                }
+                return Math.round(baseDuration / speedScale);
+            };
+
+            const createDeviceLayers = () => {
+                removeDeviceLayers();
+                for (let i = 0; i < deviceList.length; i++) {
+                    const device = deviceList[i];
+                    const circle = svg.append("circle").style("stroke-width", 5).attr("r", CIRCLE_R).style("display", "none");
+                    const staffText = svg
+                        .append("text")
+                        .attr("class", "staff_label")
+                        .attr("fill", "white")
+                        .attr("text-anchor", "middle")
+                        .text(device.substr(6))
+                        .style("display", "none");
+                    const stayRect = svgStayTime
+                        .append("rect")
+                        .attr("width", WIDTH_STAY_TIME)
+                        .attr("height", HEIGHT_STAY_TIME)
+                        .style("display", "none");
+                    const stayText = svgStayTime
+                        .append("text")
+                        .attr("class", "stay_label")
+                        .attr("text-anchor", "middle")
+                        .style("display", "none");
+                    deviceNodes.set(device, {
+                        circle,
+                        staffText,
+                        stayRect,
+                        stayText,
+                    });
+                }
+            };
+
+            const renderNurseData = () => {
+                const start = compactDayData.offsets[timeIdx];
+                const end = compactDayData.offsets[timeIdx + 1];
+                visibleByDevice.clear();
+                const moveTransition = d3
+                    .transition()
+                    .duration(getTransitionDurationMs())
+                    .ease(d3.easeLinear);
+
+                for (let i = start; i < end; i++) {
+                    const workCode = compactDayData.workCodes[i];
+                    const levelCode = compactDayData.levelCodes[i];
+                    if (!workFlagByCode[workCode]) {
+                        continue;
+                    }
+                    if (!levelFlagByCode[levelCode]) {
+                        continue;
+                    }
+                    const device = compactDayData.deviceList[compactDayData.deviceCodes[i]];
+                    visibleByDevice.set(device, i);
+                }
+
+                for (const [device, nodes] of deviceNodes.entries()) {
+                    const rowIndex = visibleByDevice.get(device);
+                    if (rowIndex === undefined) {
+                        setNodeVisible(nodes, false);
+                        continue;
+                    }
+                    const beacon = compactDayData.beaconList[compactDayData.beaconCodes[rowIndex]];
+                    const workLabel = WORK_LABELS[compactDayData.workCodes[rowIndex]];
+                    const levelLabel = LEVEL_LABELS[compactDayData.levelCodes[rowIndex]];
+                    const xValue = compactDayData.xValues[rowIndex];
+                    const yValue = compactDayData.yValues[rowIndex];
+                    const stayTime = compactDayData.stayValues[rowIndex];
+                    setNodeVisible(nodes, true);
+                    const x = xMap(xValue, device, beacon);
+                    const y = yMap(yValue, device, beacon);
+                    nodes.circle
+                        .style("fill", stateDictionary.work.active[workLabel])
+                        .style("stroke", stateDictionary.level.active[levelLabel])
+                        .transition(moveTransition)
+                        .attr("cx", x)
+                        .attr("cy", y);
+                    nodes.staffText
+                        .transition(moveTransition)
+                        .attr("x", x)
+                        .attr("y", y + 10);
+                    nodes.stayRect
+                        .style("fill", stayTimeBg(stayTime, beacon))
+                        .transition(moveTransition)
+                        .attr("x", x - WIDTH_STAY_TIME / 2)
+                        .attr("y", y - CIRCLE_R * 2);
+                    nodes.stayText
+                        .attr("fill", stayTimeText(stayTime, beacon))
+                        .text(stayTime)
+                        .transition(moveTransition)
+                        .attr("x", x)
+                        .attr("y", y - CIRCLE_R);
+                }
+            };
+
+            function updateCircle() {
+                renderNurseData();
+            }
+
+            function updateSlider() {
+                timeSlider.value = timeIdx;
+                updateSliderText();
+            }
+
+            function updateAll() {
+                updateCircle();
+                updateSlider();
+            }
+
+            const ACTIVE_SPEED_BUTTON_LABEL = {
+                play: "play",
+                rewind: "rewind",
+                stop: "◼︎",
+            };
+
+            function isActiveSpeedButton(label) {
+                return label === ACTIVE_SPEED_BUTTON_LABEL[speedState];
+            }
+
+            function updateSpeedButtonHighlight() {
+                if (!speedButtons) {
+                    return;
+                }
+                speedButtons.attr("fill", function (d) {
+                    return isActiveSpeedButton(d.label) ? d.mouse_over_color : d.color;
+                });
+            }
+
+            // functions for speed buttons
+            function handleTimeChange(delta) {
+                timeIdx += delta;
+                if (timeIdx >= TIME_INDEX_LENGTH) {
+                    timeIdx = 0;
+                } else if (timeIdx < 0) {
+                    timeIdx = TIME_INDEX_LENGTH - 1;
+                }
+                updateAll();
+            }
+
+            function handlePause() {
+                timer.stop();
+                speedState = "stop";
+                updateSpeedButtonHighlight();
+            }
+
+            function handleNext() {
+                handleTimeChange(1);
+            }
+
+            function handleNext30min() {
+                handleTimeChange(1800);
+            }
+
+            function handlePrev() {
+                handleTimeChange(-1);
+            }
+
+            function handlePrev30min() {
+                handleTimeChange(-1800);
+            }
+
+            function handlePlay(count) {
+                handlePause();
+                speedState = "play";
+                playCount += count;
+                if (playCount > 3) {
+                    playCount = 1;
+                }
+                speedButtonLabels.text(function (d) {
+                    if (d.label === "play") {
+                        playLabel = "";
+                        for (let i = 0; i < playCount; i++) {
+                            playLabel += "▶︎";
+                        }
+                        return playLabel;
+                    } else if (d.label === "rewind") {
+                        return rewindLabel;
+                    } else {
+                        return d.label;
+                    }
+                });
+                updateSpeedButtonHighlight();
+
+                timer = d3.interval(function () {
+                    handleNext();
+                }, 1000 / (FPS * playCount));
+            }
+
+            function handleRewind(count) {
+                handlePause();
+                speedState = "rewind";
+                rewindCount += count;
+                if (rewindCount > 3) {
+                    rewindCount = 1;
+                }
+                speedButtonLabels.text(function (d) {
+                    if (d.label === "rewind") {
+                        rewindLabel = "";
+                        for (let i = 0; i < rewindCount; i++) {
+                            rewindLabel += "◀︎";
+                        }
+                        return rewindLabel;
+                    } else if (d.label === "play") {
+                        return playLabel;
+                    } else {
+                        return d.label;
+                    }
+                });
+                updateSpeedButtonHighlight();
+                timer = d3.interval(function () {
+                    handlePrev();
+                }, 1000 / (FPS * rewindCount));
+            }
+
+            // Buttons setup
+            const BUTTON_X = STAGE_DIMENSIONS.width * 0.25;
+            const BUTTON_Y = 0 * STAGE_DIMENSIONS.height;
+            const BUTTON_WIDTH = 110;
+            const BUTTON_HEIGHT = 40;
+            const BUTTON_SEP = BUTTON_WIDTH + 20;
+
+            const BUTTON_COLOR = "#ffeecc";
+            const BUTTON_MOUSE_OVER_COLOR = "#ff8888";
+            const SPEED_BUTTON_DATA = [
+                {
+                    label: "30分戻る",
+                    call_back: handlePrev30min,
+                    color: BUTTON_COLOR,
+                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
+                },
+                {
+                    label: "rewind",
+                    call_back: handleRewind,
+                    color: BUTTON_COLOR,
+                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
+                },
+                {
+                    label: "◼︎",
+                    call_back: handlePause,
+                    color: BUTTON_COLOR,
+                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
+                },
+                {
+                    label: "play",
+                    call_back: handlePlay,
+                    color: BUTTON_COLOR,
+                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
+                },
+                {
+                    label: "30分進む",
+                    call_back: handleNext30min,
+                    color: BUTTON_COLOR,
+                    mouse_over_color: BUTTON_MOUSE_OVER_COLOR,
+                },
+            ];
+
+            speedButtons = speedPanel
+                .selectAll(".button")
+                .data(SPEED_BUTTON_DATA)
+                .enter()
+                .append("rect")
+                .attr("transform", function (d, i) {
+                    return "translate(" + (BUTTON_X + BUTTON_SEP * i) + ", " + BUTTON_Y + ")";
+                })
+                .attr("class", "button")
+                .attr("fill", function (d) {
+                    return d.color;
+                })
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", BUTTON_WIDTH)
+                .attr("height", BUTTON_HEIGHT)
+                .on("mouseover", function (d) {
+                    d3.select(this).attr("fill", d.mouse_over_color);
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this).attr("fill", isActiveSpeedButton(d.label) ? d.mouse_over_color : d.color);
+                })
+                .on("click", function (d) {
+                    if (d.label === "play" || d.label === "rewind") {
+                        d.call_back(1);
+                    } else {
+                        d.call_back();
+                    }
+                });
+
+            let speedButtonLabels = speedPanel
+                .selectAll(".button_label")
+                .data(SPEED_BUTTON_DATA)
+                .enter()
+                .append("text")
+                .text(function (d) {
+                    if (d.label === "play") {
+                        return playLabel;
+                    } else if (d.label === "rewind") {
+                        return rewindLabel;
+                    } else {
+                        return d.label;
+                    }
+                })
+                .attr("transform", function (d, i) {
+                    return "translate(" + (BUTTON_X + BUTTON_SEP * i) + ", " + BUTTON_Y + ")";
+                })
+                .attr("class", "button_label")
+                .attr("fill", "black")
+                .attr("x", 0.5 * BUTTON_WIDTH)
+                .attr("y", 0.67 * BUTTON_HEIGHT)
+                .attr("text-anchor", "middle");
+            updateSpeedButtonHighlight();
+
+            const WORK_TIME_BUTTON_X = 0;
+            const WORK_TIME_BUTTON_Y = 550;
+            const BUTTON_V_SEP = BUTTON_HEIGHT + 10;
+
+            function updateWorkTimeState(work_time) {
+                stateDictionary.work.flag[work_time] = !stateDictionary.work.flag[work_time];
+                workFlagByCode[WORK_LABEL_TO_CODE[work_time]] = stateDictionary.work.flag[work_time];
+                workTimeButtons.attr("fill", function (d) {
+                    if (stateDictionary.work.flag[d.label]) {
+                        return stateDictionary.work.active[d.label];
+                    } else {
+                        return stateDictionary.work.inactive[d.label];
+                    }
+                });
+                updateAll();
+            }
+
+            const WORK_TIME_BUTTON_DATA = [
+                {
+                    label: "日勤",
+                    call_back: updateWorkTimeState,
+                },
+                {
+                    label: "12時間",
+                    call_back: updateWorkTimeState,
+                },
+                {
+                    label: "夜勤",
+                    call_back: updateWorkTimeState,
+                },
+            ];
+
+            let workTimeButtons = workTimePanel
+                .selectAll(".button")
+                .data(WORK_TIME_BUTTON_DATA)
+                .enter()
+                .append("rect")
+                .attr("transform", function (d, i) {
+                    return "translate(" + WORK_TIME_BUTTON_X + ", " + (WORK_TIME_BUTTON_Y + BUTTON_V_SEP * i) + ")";
+                })
+                .attr("class", "button")
+                .attr("fill", function (d) {
+                    if (stateDictionary.work.flag[d.label]) {
+                        return stateDictionary.work.active[d.label];
+                    } else {
+                        return stateDictionary.work.inactive[d.label];
+                    }
+                })
+                .attr("x", 1000)
+                .attr("y", 0)
+                .attr("width", BUTTON_WIDTH)
+                .attr("height", BUTTON_HEIGHT)
+                .on("click", function (d) {
+                    d.call_back(d.label);
+                });
+
+            workTimePanel
+                .selectAll(".button_label")
+                .data(WORK_TIME_BUTTON_DATA)
+                .enter()
+                .append("text")
+                .text(function (d) {
+                    return d.label;
+                })
+                .attr("transform", function (d, i) {
+                    return "translate(" + WORK_TIME_BUTTON_X + ", " + (WORK_TIME_BUTTON_Y + BUTTON_V_SEP * i) + ")";
+                })
+                .attr("class", "button_label")
+                .attr("fill", "white")
+                .attr("x", 1000 + 0.5 * BUTTON_WIDTH)
+                .attr("y", 0.67 * BUTTON_HEIGHT)
+                .attr("text-anchor", "middle");
+
+            const LEVEL_BUTTON_X = 0;
+            const LEVEL_BUTTON_Y = 50;
+
+            function updateLevelState(level) {
+                stateDictionary.level.flag[level] = !stateDictionary.level.flag[level];
+                levelFlagByCode[LEVEL_LABEL_TO_CODE[level]] = stateDictionary.level.flag[level];
+                levelButtons.attr("fill", function (d) {
+                    if (stateDictionary.level.flag[d.label]) {
+                        return stateDictionary.level.active[d.label];
+                    } else {
+                        return stateDictionary.level.inactive[d.label];
+                    }
+                });
+                updateAll();
+            }
+
+            const LEVEL_BUTTON_DATA = [
+                {
+                    label: "未取得",
+                    call_back: updateLevelState,
+                },
+                {
+                    label: "レベルⅠ",
+                    call_back: updateLevelState,
+                },
+                {
+                    label: "レベルⅡ",
+                    call_back: updateLevelState,
+                },
+                {
+                    label: "レベルⅢ",
+                    call_back: updateLevelState,
+                },
+                {
+                    label: "レベルⅣ",
+                    call_back: updateLevelState,
+                },
+            ];
+
+            let levelButtons = levelPanel
+                .selectAll(".button")
+                .data(LEVEL_BUTTON_DATA)
+                .enter()
+                .append("rect")
+                .attr("transform", function (d, i) {
+                    return "translate(" + LEVEL_BUTTON_X + ", " + (LEVEL_BUTTON_Y + BUTTON_V_SEP * i) + ")";
+                })
+                .attr("class", "button")
+                .attr("fill", function (d) {
+                    if (stateDictionary.level.flag[d.label]) {
+                        return stateDictionary.level.active[d.label];
+                    } else {
+                        return stateDictionary.level.inactive[d.label];
+                    }
+                })
+                .attr("x", 1000)
+                .attr("y", 200)
+                .attr("width", BUTTON_WIDTH)
+                .attr("height", BUTTON_HEIGHT)
+                .on("click", function (d) {
+                    d.call_back(d.label);
+                });
+
+            levelPanel
+                .selectAll(".button_label")
+                .data(LEVEL_BUTTON_DATA)
+                .enter()
+                .append("text")
+                .text(function (d) {
+                    return d.label;
+                })
+                .attr("transform", function (d, i) {
+                    return "translate(" + LEVEL_BUTTON_X + ", " + (LEVEL_BUTTON_Y + BUTTON_V_SEP * i) + ")";
+                })
+                .attr("class", "button_label")
+                .attr("fill", "white")
+                .attr("x", 1000 + 0.5 * BUTTON_WIDTH)
+                .attr("y", 200 + 0.67 * BUTTON_HEIGHT)
+                .attr("text-anchor", "middle");
+
+            const prefetchNeighborDates = () => {
+                const currentIdx = selectDate.selectedIndex;
+                const targetIndexes = [currentIdx - 1, currentIdx + 1];
+                for (let i = 0; i < targetIndexes.length; i++) {
+                    const targetIdx = targetIndexes[i];
+                    if (targetIdx < 0 || targetIdx >= selectDate.options.length) {
+                        continue;
+                    }
+                    const candidate = selectDate.options[targetIdx].value;
+                    if (dataCache.has(candidate) || pendingLoads.has(candidate)) {
+                        continue;
+                    }
+                    loadDayData(candidate).catch(() => {});
+                }
+            };
+
+            const applyDayData = (dateValue, dayData) => {
+                setDateContext(dateValue);
+                compactDayData = dayData || createEmptyDayData();
+                deviceList = compactDayData.deviceList;
+                visibleByDevice.clear();
+                updateDeviceStationPos();
+                createDeviceLayers();
+                timeIdx = 0;
+                updateAll();
+            };
+
+            const switchDate = async (dateValue) => {
+                const token = ++dateSwitchToken;
+                handlePause();
+                showLoading();
+                try {
+                    const dayData = await loadDayData(dateValue);
+                    if (token !== dateSwitchToken) {
+                        return;
+                    }
+                    applyDayData(dateValue, dayData);
+                    prefetchNeighborDates();
+                } catch (error) {
+                    console.error(error);
+                    alert(`データ読み込みに失敗しました: ${dateValue}`);
+                } finally {
+                    if (token === dateSwitchToken) {
+                        hideLoading();
+                    }
+                }
+            };
+
+            timeSlider.addEventListener("input", () => {
+                timeIdx = Number(timeSlider.value);
+                updateAll();
+            });
+
+            selectDate.addEventListener("change", () => {
+                const idx = selectDate.selectedIndex;
+                switchDate(selectDate.options[idx].value);
+            });
+
+            const idx = selectDate.selectedIndex;
+            switchDate(selectDate.options[idx].value);
+        }
+    </script>
 </body>
-</html>

@@ -482,11 +482,28 @@ async function startVisualize() {
     };
 
     const setNodeVisible = (nodes, visible) => {
+        if (!visible) {
+            nodes.circle.interrupt();
+            nodes.staffText.interrupt();
+            nodes.stayRect.interrupt();
+            nodes.stayText.interrupt();
+        }
         const display = visible ? null : "none";
         nodes.circle.style("display", display);
         nodes.staffText.style("display", display);
         nodes.stayRect.style("display", display);
         nodes.stayText.style("display", display);
+    };
+
+    const getTransitionDurationMs = () => {
+        const baseDuration = 250;
+        let speedScale = 1;
+        if (speedState === "play") {
+            speedScale = playCount > 0 ? playCount : 1;
+        } else if (speedState === "rewind") {
+            speedScale = rewindCount > 0 ? rewindCount : 1;
+        }
+        return Math.round(baseDuration / speedScale);
     };
 
     const createDeviceLayers = () => {
@@ -533,6 +550,10 @@ async function startVisualize() {
         const start = compactDayData.offsets[timeIdx];
         const end = compactDayData.offsets[timeIdx + 1];
         visibleByDevice.clear();
+        const moveTransition = d3
+            .transition()
+            .duration(getTransitionDurationMs())
+            .ease(d3.easeLinear);
 
         for (let i = start; i < end; i++) {
             const workCode = compactDayData.workCodes[i];
@@ -565,15 +586,24 @@ async function startVisualize() {
             nodes.circle
                 .style("fill", stateDictionary.work.active[workLabel])
                 .style("stroke", stateDictionary.level.active[levelLabel])
+                .transition(moveTransition)
                 .attr("cx", x)
                 .attr("cy", y);
-            nodes.staffText.attr("x", x).attr("y", y + 10);
-            nodes.stayRect.attr("x", x - WIDTH_STAY_TIME / 2).attr("y", y - CIRCLE_R * 2).style("fill", stayTimeBg(stayTime, beacon));
-            nodes.stayText
+            nodes.staffText
+                .transition(moveTransition)
                 .attr("x", x)
-                .attr("y", y - CIRCLE_R)
+                .attr("y", y + 10);
+            nodes.stayRect
+                .style("fill", stayTimeBg(stayTime, beacon))
+                .transition(moveTransition)
+                .attr("x", x - WIDTH_STAY_TIME / 2)
+                .attr("y", y - CIRCLE_R * 2);
+            nodes.stayText
                 .attr("fill", stayTimeText(stayTime, beacon))
-                .text(stayTime);
+                .text(stayTime)
+                .transition(moveTransition)
+                .attr("x", x)
+                .attr("y", y - CIRCLE_R);
         }
     };
 
