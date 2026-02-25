@@ -16,7 +16,7 @@ $PackageRoot = Join-Path $DistDir "_package_win"
 $PackageDir = Join-Path $PackageRoot $PackageName
 $ArchivePath = Join-Path $DistDir "$PackageName.zip"
 
-python -m PyInstaller --clean --workpath .pyi-build --distpath $DistDir build/pyinstaller/visualize_movement_win.spec
+python -m PyInstaller -y --clean --workpath .pyi-build --distpath $DistDir build/pyinstaller/visualize_movement_win.spec
 
 if (-not (Test-Path -Path $ExeDir -PathType Container)) {
     throw "Build output not found: $ExeDir"

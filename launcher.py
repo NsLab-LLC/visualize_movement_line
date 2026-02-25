@@ -87,7 +87,12 @@ def dedupe_paths(paths: list[Path]) -> list[Path]:
 def runtime_base_dirs() -> list[Path]:
     if getattr(sys, "frozen", False):
         executable_path = Path(sys.executable).resolve()
-        candidates = [executable_path.parent, executable_path.parent.parent]
+        contents_dir = executable_path.parent.parent
+        candidates = [
+            executable_path.parent,
+            contents_dir,
+            contents_dir / "Resources",
+        ]
         if (
             executable_path.parent.name == "MacOS"
             and executable_path.parent.parent.name == "Contents"
@@ -192,13 +197,21 @@ def is_server_alive(port: int, timeout_seconds: float = 0.6) -> bool:
         return False
 
 
+def is_main_page_available(url: str, timeout_seconds: float = 0.8) -> bool:
+    try:
+        with urlopen(url, timeout=timeout_seconds) as response:
+            return response.status == 200
+    except (URLError, OSError, TimeoutError, ValueError):
+        return False
+
+
 def find_running_instance(lock_file: Path) -> tuple[int, str] | None:
     lock_data = read_lock(lock_file)
     if not lock_data:
         return None
     port = lock_data["port"]
     url = lock_data["url"]
-    if is_server_alive(port):
+    if is_server_alive(port) and is_main_page_available(url):
         return port, url
     remove_lock(lock_file)
     return None

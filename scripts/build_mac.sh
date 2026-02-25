@@ -15,6 +15,7 @@ ARCHIVE_PATH="$DIST_DIR/${PACKAGE_NAME}.zip"
 USER_README="$ROOT_DIR/docs/README_利用者向け.txt"
 
 python3 -m PyInstaller \
+  -y \
   --clean \
   --workpath .pyi-build \
   --distpath "$DIST_DIR" \

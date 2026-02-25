@@ -53,6 +53,12 @@ data1 = [
 3. 既定ブラウザで可視化画面が自動で開きます。
 4. データ更新時は `VisualizeMovementData/data/` のみ差し替えます（アプリ再ビルド不要）。
 
+補足（404 エラーが出る場合）:
+- 旧バージョンの起動情報が残っている可能性があります。
+- macOS/Linux: `rm -f ~/.visualize_movement_line/server.lock.json`
+- Windows PowerShell: `Remove-Item "$HOME/.visualize_movement_line/server.lock.json" -ErrorAction SilentlyContinue`
+- その後、アプリを再起動してください。
+
 # 使い方（開発者向け）
 
 1. 事前圧縮を実行します。  
