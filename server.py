@@ -8,9 +8,11 @@ the server returns the sidecar file with `Content-Encoding: gzip`.
 from __future__ import annotations
 
 import argparse
+import functools
 import os
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 DEFAULT_COMPRESSIBLE_EXTENSIONS = {
@@ -21,6 +23,9 @@ DEFAULT_COMPRESSIBLE_EXTENSIONS = {
     ".svg",
     ".txt",
 }
+HEALTH_PATH = "/__health"
+HEALTH_RESPONSE_TEXT = "ok:visualize-movement-line"
+HEALTH_RESPONSE_BYTES = (HEALTH_RESPONSE_TEXT + "\n").encode("utf-8")
 
 
 class GzipSidecarHandler(SimpleHTTPRequestHandler):
@@ -53,6 +58,18 @@ class GzipSidecarHandler(SimpleHTTPRequestHandler):
         gzip_path = path.with_name(path.name + ".gz")
         return gzip_path.is_file()
 
+    def do_GET(self) -> None:  # noqa: N802 - stdlib method name
+        request_path = urlsplit(self.path).path
+        if request_path == HEALTH_PATH:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(HEALTH_RESPONSE_BYTES)))
+            self.end_headers()
+            self.wfile.write(HEALTH_RESPONSE_BYTES)
+            return
+        return super().do_GET()
+
     def send_head(self):  # noqa: D401 - overriding stdlib method
         path = Path(self.translate_path(self.path))
         if self._accepts_gzip() and self._can_serve_gzip_sidecar(path):
@@ -74,6 +91,11 @@ class GzipSidecarHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return file_obj
         return super().send_head()
+
+
+def create_server(host: str, port: int, directory: str) -> ThreadingHTTPServer:
+    handler_cls = functools.partial(GzipSidecarHandler, directory=directory)
+    return ThreadingHTTPServer((host, port), handler_cls)
 
 
 def parse_args() -> argparse.Namespace:
@@ -101,13 +123,9 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    handler = lambda *a, **kw: GzipSidecarHandler(  # noqa: E731
-        *a,
-        directory=args.directory,
-        **kw,
-    )
-    server = ThreadingHTTPServer((args.host, args.port), handler)
-    print(f"Serving {args.directory} on http://{args.host}:{args.port}")
+    server = create_server(args.host, args.port, args.directory)
+    bound_host, bound_port = server.server_address[:2]
+    print(f"Serving {args.directory} on http://{bound_host}:{bound_port}")
     print("gzip sidecar enabled: serve *.gz when Accept-Encoding includes gzip")
     try:
         server.serve_forever()

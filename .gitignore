@@ -1,2 +1,5 @@
 AGENTS.md
 .DS_Store
+dist/
+.pyi-build/
+__pycache__/
