@@ -11,6 +11,8 @@
 - `data/js/test/2023-03-15_1.js` : サンプルデータ (グローバル変数 `data1` として宣言)．
 - `data/js/test/2023-03-15_2.js` : サンプルデータ (グローバル変数 `data2` として宣言)．
 - `data/fig/test.jpg` : 背景画像 (フロア図)．
+- `scripts/precompress_gzip.py` : `.js` などの静的ファイルを `.gz` に事前圧縮するスクリプト．
+- `server.py` : `Accept-Encoding: gzip` を受け取ったときに `.gz` を優先配信する静的サーバー．
 
 # データ形式
 
@@ -37,14 +39,22 @@ data1 = [
 
 # 使い方
 
-1. プロジェクトルートでローカルサーバーを起動する (`python3 -m http.server 8000`)．
-2. ブラウザで `http://localhost:8000/main.html` を開く．
-3. 画面操作  
+1. (推奨) 事前圧縮を実行する (`python3 scripts/precompress_gzip.py --root . --ext .js`)．
+2. gzip対応サーバーを起動する (`python3 server.py --port 8000`)．
+3. ブラウザで `http://localhost:8000/main.html` を開く．
+4. 画面操作  
    - 上部スライダー: 任意の秒へシーク．  
    - 再生/逆再生/停止/30 分ジャンプボタン: 時間アニメーションを制御 (最大 3 段階速度)．  
    - 勤務帯ボタン (`日勤`/`12時間`/`夜勤`): クリックで表示/非表示をトグル．  
    - レベルボタン (`未取得`/`レベルⅠ`〜`Ⅳ`): クリックで表示/非表示をトグル．
-4. 円の塗り色は勤務帯，枠線色はレベルで決定．コリドー以外では滞在時間バッジを表示．
+5. 円の塗り色は勤務帯，枠線色はレベルで決定．コリドー以外では滞在時間バッジを表示．
+
+# gzip 配信の運用
+
+- データを更新したら `python3 scripts/precompress_gzip.py --root . --ext .js` を再実行する．
+- ブラウザが gzip を受け入れる場合，`server.py` は `*.js.gz` を `Content-Encoding: gzip` で返す．
+- `*.gz` がないファイルは通常ファイルをそのまま返すため，既存構成を壊さず段階移行できる．
+- ヘッダ確認例: `curl -I -H 'Accept-Encoding: gzip' http://localhost:8000/data/js/test/2023-03-15_1.js`
 
 # カスタマイズ手順
 
