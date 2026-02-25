@@ -151,7 +151,6 @@
             const DAY_BOUNDARY_INDEX = (24 - START_HOUR) * 60 * 60;
             const FPS = 10;
             const DATA_CACHE_LIMIT = 3;
-            const EMPTY_ROWS = Object.freeze([]);
             const CIRCLE_R = 20;
             const WIDTH_STAY_TIME = 50;
             const HEIGHT_STAY_TIME = 25;
@@ -205,8 +204,34 @@
             const BG_STAY_TIME_CLEAR = "rgb(255, 255, 255, 0)";
             const BG_TEXT_STAY_TIME = "rgb(0, 0, 0, 1)";
             const BG_TEXT_STAY_TIME_CLEAR = "rgb(0, 0, 0, 0)";
+            const WORK_LABELS = Object.freeze(["12時間", "日勤", "夜勤"]);
+            const LEVEL_LABELS = Object.freeze(["未取得", "レベルⅠ", "レベルⅡ", "レベルⅢ", "レベルⅣ"]);
+            const WORK_LABEL_TO_CODE = Object.freeze({
+                "12時間": 0,
+                "日勤": 1,
+                "夜勤": 2,
+            });
+            const LEVEL_LABEL_TO_CODE = Object.freeze({
+                "未取得": 0,
+                "レベルⅠ": 1,
+                "レベルⅡ": 2,
+                "レベルⅢ": 3,
+                "レベルⅣ": 4,
+            });
+            const createEmptyDayData = () => ({
+                deviceList: [],
+                beaconList: [],
+                offsets: new Uint32Array(TIME_INDEX_LENGTH + 1),
+                deviceCodes: new Uint16Array(0),
+                beaconCodes: new Uint16Array(0),
+                levelCodes: new Uint8Array(0),
+                workCodes: new Uint8Array(0),
+                xValues: new Int16Array(0),
+                yValues: new Int16Array(0),
+                stayValues: new Uint16Array(0),
+            });
 
-            let rowsByTime = Array.from({ length: TIME_INDEX_LENGTH }, () => EMPTY_ROWS);
+            let compactDayData = createEmptyDayData();
             let deviceList = [];
             let deviceStationPos = {};
             let activeDateLabel = "";
@@ -219,13 +244,24 @@
             let playCount = 0;
             let rewindCount = 0;
             let dateSwitchToken = 0;
+            let loadRequestId = 0;
 
             const dataCache = new Map();
             const pendingLoads = new Map();
             const deviceNodes = new Map();
+            const visibleByDevice = new Map();
+            const pendingWorkerRequests = new Map();
+            const dayDataWorker = new Worker("./scripts/day_data_worker.js");
+            let workFlagByCode = WORK_LABELS.map(() => true);
+            let levelFlagByCode = LEVEL_LABELS.map(() => true);
 
             const showLoading = () => loading.classList.remove("loaded");
             const hideLoading = () => loading.classList.add("loaded");
+            const syncFilterCodeFlags = () => {
+                workFlagByCode = WORK_LABELS.map((label) => Boolean(stateDictionary.work.flag[label]));
+                levelFlagByCode = LEVEL_LABELS.map((label) => Boolean(stateDictionary.level.flag[label]));
+            };
+            syncFilterCodeFlags();
 
             function formatDate(date, format) {
                 format = format.replace(/yyyy/g, date.getFullYear());
@@ -257,46 +293,63 @@
                 nextDateLabel = formatDate(dateNight, "yyyy-MM-dd");
             };
 
-            const parseAssignedArray = (sourceText) => {
-                const assignIdx = sourceText.indexOf("=");
-                if (assignIdx < 0) {
-                    throw new Error("Invalid data file format: '=' not found.");
-                }
-                let payload = sourceText.slice(assignIdx + 1).trim();
-                if (payload.endsWith(";")) {
-                    payload = payload.slice(0, -1);
-                }
-                return JSON.parse(payload);
-            };
+            const hydrateDayData = (workerDayData) => ({
+                deviceList: workerDayData.deviceList || [],
+                beaconList: workerDayData.beaconList || [],
+                offsets: workerDayData.offsets || new Uint32Array(TIME_INDEX_LENGTH + 1),
+                deviceCodes: workerDayData.deviceCodes || new Uint16Array(0),
+                beaconCodes: workerDayData.beaconCodes || new Uint16Array(0),
+                levelCodes: workerDayData.levelCodes || new Uint8Array(0),
+                workCodes: workerDayData.workCodes || new Uint8Array(0),
+                xValues: workerDayData.xValues || new Int16Array(0),
+                yValues: workerDayData.yValues || new Int16Array(0),
+                stayValues: workerDayData.stayValues || new Uint16Array(0),
+            });
 
-            const fetchText = async (path) => {
-                const response = await fetch(path, { cache: "force-cache" });
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch ${path}: ${response.status}`);
+            dayDataWorker.addEventListener("message", (event) => {
+                const message = event.data || {};
+                if (message.type !== "load-day-result") {
+                    return;
                 }
-                return response.text();
-            };
+                const pending = pendingWorkerRequests.get(message.requestId);
+                if (!pending) {
+                    return;
+                }
+                pendingWorkerRequests.delete(message.requestId);
+                if (!message.ok) {
+                    pending.reject(new Error(message.error || "Unknown worker error"));
+                    return;
+                }
+                pending.resolve(hydrateDayData(message.dayData || {}));
+            });
 
-            const buildDayData = (rows1, rows2) => {
-                const buckets = Array.from({ length: TIME_INDEX_LENGTH }, () => []);
-                const deviceSet = new Set();
-                const indexRows = (rows) => {
-                    for (let i = 0; i < rows.length; i++) {
-                        const row = rows[i];
-                        const idx = row.time_idx;
-                        if (idx >= 0 && idx < TIME_INDEX_LENGTH) {
-                            buckets[idx].push(row);
-                            deviceSet.add(row.device);
-                        }
-                    }
-                };
-                indexRows(rows1);
-                indexRows(rows2);
-                return {
-                    rowsByTime: buckets,
-                    deviceList: [...deviceSet],
-                };
-            };
+            dayDataWorker.addEventListener("error", (event) => {
+                const error = new Error(event.message || "Worker error");
+                for (const pending of pendingWorkerRequests.values()) {
+                    pending.reject(error);
+                }
+                pendingWorkerRequests.clear();
+            });
+
+            window.addEventListener("beforeunload", () => {
+                dayDataWorker.terminate();
+            });
+
+            const requestDayData = (dateValue) =>
+                new Promise((resolve, reject) => {
+                    const requestId = ++loadRequestId;
+                    pendingWorkerRequests.set(requestId, {
+                        resolve,
+                        reject,
+                    });
+                    dayDataWorker.postMessage({
+                        type: "load-day",
+                        requestId,
+                        ward,
+                        dateValue,
+                        timeIndexLength: TIME_INDEX_LENGTH,
+                    });
+                });
 
             const touchCache = (dateValue, value) => {
                 if (dataCache.has(dateValue)) {
@@ -319,12 +372,7 @@
                     return pendingLoads.get(dateValue);
                 }
                 const promise = (async () => {
-                    const file1 = `./data/js/${ward}/${dateValue}_1.js`;
-                    const file2 = `./data/js/${ward}/${dateValue}_2.js`;
-                    const [text1, text2] = await Promise.all([fetchText(file1), fetchText(file2)]);
-                    const rows1 = parseAssignedArray(text1);
-                    const rows2 = parseAssignedArray(text2);
-                    const dayData = buildDayData(rows1, rows2);
+                    const dayData = await requestDayData(dateValue);
                     touchCache(dateValue, dayData);
                     return dayData;
                 })().finally(() => {
@@ -480,43 +528,50 @@
             };
 
             const renderNurseData = () => {
-                const rowsAtTime = rowsByTime[timeIdx] || EMPTY_ROWS;
-                const visibleByDevice = new Map();
-                for (let i = 0; i < rowsAtTime.length; i++) {
-                    const row = rowsAtTime[i];
-                    if (row.rssi <= -120) {
+                const start = compactDayData.offsets[timeIdx];
+                const end = compactDayData.offsets[timeIdx + 1];
+                visibleByDevice.clear();
+
+                for (let i = start; i < end; i++) {
+                    const workCode = compactDayData.workCodes[i];
+                    const levelCode = compactDayData.levelCodes[i];
+                    if (!workFlagByCode[workCode]) {
                         continue;
                     }
-                    if (!stateDictionary.work.flag[row.work_time]) {
+                    if (!levelFlagByCode[levelCode]) {
                         continue;
                     }
-                    if (!stateDictionary.level.flag[row.level]) {
-                        continue;
-                    }
-                    visibleByDevice.set(row.device, row);
+                    const device = compactDayData.deviceList[compactDayData.deviceCodes[i]];
+                    visibleByDevice.set(device, i);
                 }
 
                 for (const [device, nodes] of deviceNodes.entries()) {
-                    const row = visibleByDevice.get(device);
-                    if (!row) {
+                    const rowIndex = visibleByDevice.get(device);
+                    if (rowIndex === undefined) {
                         setNodeVisible(nodes, false);
                         continue;
                     }
+                    const beacon = compactDayData.beaconList[compactDayData.beaconCodes[rowIndex]];
+                    const workLabel = WORK_LABELS[compactDayData.workCodes[rowIndex]];
+                    const levelLabel = LEVEL_LABELS[compactDayData.levelCodes[rowIndex]];
+                    const xValue = compactDayData.xValues[rowIndex];
+                    const yValue = compactDayData.yValues[rowIndex];
+                    const stayTime = compactDayData.stayValues[rowIndex];
                     setNodeVisible(nodes, true);
-                    const x = xMap(row.x, row.device, row.beacon);
-                    const y = yMap(row.y, row.device, row.beacon);
+                    const x = xMap(xValue, device, beacon);
+                    const y = yMap(yValue, device, beacon);
                     nodes.circle
-                        .style("fill", stateDictionary.work.active[row.work_time])
-                        .style("stroke", stateDictionary.level.active[row.level])
+                        .style("fill", stateDictionary.work.active[workLabel])
+                        .style("stroke", stateDictionary.level.active[levelLabel])
                         .attr("cx", x)
                         .attr("cy", y);
                     nodes.staffText.attr("x", x).attr("y", y + 10);
-                    nodes.stayRect.attr("x", x - WIDTH_STAY_TIME / 2).attr("y", y - CIRCLE_R * 2).style("fill", stayTimeBg(row.stay_time, row.beacon));
+                    nodes.stayRect.attr("x", x - WIDTH_STAY_TIME / 2).attr("y", y - CIRCLE_R * 2).style("fill", stayTimeBg(stayTime, beacon));
                     nodes.stayText
                         .attr("x", x)
                         .attr("y", y - CIRCLE_R)
-                        .attr("fill", stayTimeText(row.stay_time, row.beacon))
-                        .text(row.stay_time);
+                        .attr("fill", stayTimeText(stayTime, beacon))
+                        .text(stayTime);
                 }
             };
 
@@ -718,6 +773,7 @@
 
             function updateWorkTimeState(work_time) {
                 stateDictionary.work.flag[work_time] = !stateDictionary.work.flag[work_time];
+                workFlagByCode[WORK_LABEL_TO_CODE[work_time]] = stateDictionary.work.flag[work_time];
                 workTimeButtons.attr("fill", function (d) {
                     if (stateDictionary.work.flag[d.label]) {
                         return stateDictionary.work.active[d.label];
@@ -789,6 +845,7 @@
 
             function updateLevelState(level) {
                 stateDictionary.level.flag[level] = !stateDictionary.level.flag[level];
+                levelFlagByCode[LEVEL_LABEL_TO_CODE[level]] = stateDictionary.level.flag[level];
                 levelButtons.attr("fill", function (d) {
                     if (stateDictionary.level.flag[d.label]) {
                         return stateDictionary.level.active[d.label];
@@ -881,8 +938,9 @@
 
             const applyDayData = (dateValue, dayData) => {
                 setDateContext(dateValue);
-                rowsByTime = dayData.rowsByTime;
-                deviceList = dayData.deviceList;
+                compactDayData = dayData || createEmptyDayData();
+                deviceList = compactDayData.deviceList;
+                visibleByDevice.clear();
                 updateDeviceStationPos();
                 createDeviceLayers();
                 timeIdx = 0;
