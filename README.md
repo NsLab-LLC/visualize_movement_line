@@ -19,7 +19,7 @@
 - `server.py`：gzip sidecar 対応静的サーバーである．
 - `build/pyinstaller/*.spec`：macOS／Windows 向けビルド設定である．
 - `scripts/build_mac.sh`：macOS 配布物のビルドと ZIP 化を行う．
-- `scripts/build_win.ps1`：Windows 配布物のビルドと ZIP 化を行う．
+- `scripts/build_win.cmd`：Windows 配布物のビルドと ZIP 化を行う．
 - `scripts/precompress_gzip.py`：`.js` の事前 gzip 圧縮を行う．
 - `docs/README_利用者向け.txt`：配布 ZIP 同梱の利用者向け手順である．
 
@@ -74,13 +74,13 @@ data1 = [
 # 配布物ビルド
 
 - macOS ビルドは `./scripts/build_mac.sh` を実行する．
-- Windows（PowerShell）ビルドは `.\scripts\build_win.ps1` を実行する．
+- Windows（cmd）ビルドは `scripts\build_win.cmd` を実行する．
 - 任意バージョン指定例（macOS）は `./scripts/build_mac.sh 20260225` である．
-- 任意バージョン指定例（Windows）は `.\scripts\build_win.ps1 -Version 20260225` である．
+- 任意バージョン指定例（Windows）は `scripts\build_win.cmd 20260225` である．
 - 生成先は `dist/VisualizeMovement_macOS_<version>.zip` および `dist/VisualizeMovement_Windows_<version>.zip` である．
 - 事前条件は，ビルドに使う同じ Python 環境に `PyInstaller` がインストール済みであることである．
 - インストール例（macOS/Linux）は `python3 -m pip install pyinstaller` である．
-- インストール例（Windows PowerShell）は `python -m pip install pyinstaller` である．
+- インストール例（Windows）は `python -m pip install pyinstaller` である．
 - インストール確認（macOS/Linux）は `python3 -m PyInstaller --version` である．
 - インストール確認（Windows）は `python -m PyInstaller --version` である．
 - `No module named PyInstaller` が出る場合は，仮想環境を有効化した状態で上記インストールを実行する．
